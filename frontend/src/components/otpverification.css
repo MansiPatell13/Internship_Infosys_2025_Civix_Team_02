@@ -1,0 +1,91 @@
+* {
+  font-family: 'Times New Roman', Times, serif;
+  box-sizing: border-box;
+}
+
+.otp-container {
+  width: 150vh;
+  margin: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  height: 90vh;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.otp-left {
+  width: 50%;
+  padding: 0.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.otp-heading {
+  font-size: 45px;
+  font-weight: 1000;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.otp-instructions {
+  font-size: 19px;
+  margin-top: 0.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  width: 80%;
+}
+
+.otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.otp-box {
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.otp-button {
+  width: 60%;
+  height: 2.2rem;
+  background-color: green;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.otp-button:focus {
+  outline: none;
+}
+
+.otp-button:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.green {
+  color: green;
+}
+
+.otp-right {
+  width: 50%;
+  padding: 0.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.otp-right img {
+  border-radius: 10px;
+  object-fit: cover;
+  width: 100%;
+
+}
