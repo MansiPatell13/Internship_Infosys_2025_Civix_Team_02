@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { connectDB } from "./src/config/db.js";
 import authRoutes from "./src/routes/auth.routes.js";
 import dashboardRoutes from "./src/routes/dashboard.routes.js";
+import forgotPasswordRoutes from "./src/routes/forgotPassword.routes.js";
 
 dotenv.config();
 
@@ -19,6 +20,9 @@ app.use(morgan("dev"));
 app.get("/", (req, res) => res.json({ ok: true, service: "Civix Auth" }));
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+// forgot password routes
+app.use("/api/auth", forgotPasswordRoutes);
+
 
 // Start
 const PORT = process.env.PORT || 4000;
