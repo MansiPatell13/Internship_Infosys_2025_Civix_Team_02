@@ -2,8 +2,9 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
-import  {connectDB} from "./src/config/db.js";
+import { connectDB } from "./src/config/db.js";
 import authRoutes from "./src/routes/auth.routes.js";
+import dashboardRoutes from "./src/routes/dashboard.routes.js";
 
 dotenv.config();
 
@@ -17,18 +18,20 @@ app.use(morgan("dev"));
 // Routes
 app.get("/", (req, res) => res.json({ ok: true, service: "Civix Auth" }));
 app.use("/api/auth", authRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Start
 const PORT = process.env.PORT || 4000;
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(` Server running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error(" Failed to connect DB:", err);
+    process.exit(1);
   });
-}).catch((err) => {
-  console.error("Failed to connect DB:", err);
-  process.exit(1);
-});
-
 
 // Error handler (last)
 app.use((err, _req, res, _next) => {
