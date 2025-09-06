@@ -89,3 +89,29 @@
   width: 100%;
 
 }
+@media (max-width: 768px) {
+  .otp-container {
+    flex-direction: column;
+    width: 100% !important;       /* Responsive width */
+    max-width: 600px;             /* Optional: max width to avoid too wide */
+    height: auto;
+    padding: 1rem;
+    margin: auto !important; /* Center horizontally */
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .otp-left {
+    width: 100% !important;
+  }
+
+  .otp-right {
+    display: none !important; /* Hide map on small screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .otp-container {
+    width: 95vw;
+  }
+}

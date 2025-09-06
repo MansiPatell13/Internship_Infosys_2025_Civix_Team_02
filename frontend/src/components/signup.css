@@ -191,3 +191,95 @@
   font-family:'Times New Roman', Times, serif;
   box-sizing: border-box;
 }
+/* Responsive for tablets and smaller */
+@media (max-width: 768px) {
+  .signup-wrapper {
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+  }
+
+  .signup-content,
+  .image-section {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .signup-content {
+    padding: 0;
+  }
+
+  .signup-heading {
+    font-size: 28px;
+    text-align: center;
+  }
+
+  .signup-subtitle {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .tab-switcher {
+    width: 100%;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .tab-link {
+    font-size: 14px;
+    padding: 0.4rem 0;
+  }
+
+  .form-wrapper {
+    width: 100% !important;
+  }
+
+  .form-field {
+    width: 100% !important;
+  }
+
+  .radio-group {
+    width: 100% !important;
+  }
+
+  .submit-btn {
+    width: 100% !important;
+  }
+
+  .image-section {
+    margin-top: 2rem;
+  }
+
+  .signup-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+  }
+}
+
+/* Responsive for mobile phones */
+@media (max-width: 480px) {
+  .signup-heading {
+    font-size: 24px;
+  }
+
+  .signup-subtitle {
+    font-size: 14px;
+  }
+
+  .tab-link {
+    font-size: 12px;
+  }
+
+  .submit-btn {
+    font-size: 14px;
+    padding: 0.6rem 0;
+  }
+}
+@media (max-width: 768px) {
+  .image-section {
+    display: none !important;
+  }
+}

@@ -98,3 +98,58 @@
 .green {
   color: green;
 }
+@media (max-width: 768px) {
+  .forgot-container {
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+
+  }
+
+  .forgot-left {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 1rem;
+    margin-top: 1rem;
+    align-items: center;
+  }
+
+  .forgot-description {
+    width: 100%;
+    padding: 0 1rem;
+  }
+
+  .forgot-form {
+    width: 100%;
+    max-width: none;
+    padding: 0 1rem;
+  }
+
+  .forgot-button {
+    width: 100%;
+  }
+
+  /* Hide the whole right container including the map */
+  .forgot-right {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .forgot-title {
+    font-size: 32px;
+  }
+
+  .forgot-description {
+    font-size: 16px;
+  }
+
+  .forgot-input {
+    font-size: 14px;
+  }
+
+  .forgot-button {
+    height: 2.5rem;
+  }
+}
