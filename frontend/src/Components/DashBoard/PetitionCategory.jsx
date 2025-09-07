@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import Navbar from "../Landing/Navbar";
 import Footer from "../Landing/Footer";
 
+
 const CategoryPetitions = () => {
   const { category } = useParams();
   const [petitions, setPetitions] = useState([]);
