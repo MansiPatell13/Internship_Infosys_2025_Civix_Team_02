@@ -1,0 +1,68 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+.app-wrapper {
+   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;                    
+}
+
+.heroSection{
+  height: 75vh;
+  display: flex;
+  align-items: center;   /* vertical center */
+  text-align: left;      /* left-align text */
+  padding-left: 8%;      /* push content from left */
+  padding-right: 8%;     /* keep some spacing on right */
+  /* color: white; */
+}
+
+.box{
+  background-image: url("/img1.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.foot{
+  background-color: #448244;
+  /* bottom: 0;
+  left: 0;
+  position: relative; */
+  width: 100%;
+  padding: 3px 0;
+  color: white;
+  margin-top: auto;
+}
+
+.left{
+  background-color: #448244;
+}
+
+.sec2{
+  background-color: #E7EFC7;
+}
+
+.navbar .nav-link .enter{
+  color: #333;
+  opacity: 1;
+  transition: opacity 0.3s ease, border-bottom 0.3s ease;
+}
+
+.navbar .nav-link:hover .enter:hover{
+  color: #198754;
+    font-size: 18px;
+    opacity: 0.5;
+
+}
+
+.navbar .nav-link.active{
+  color: #198754;
+  font-weight: 600;
+}
