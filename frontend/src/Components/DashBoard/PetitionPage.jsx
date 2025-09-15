@@ -14,7 +14,7 @@ const PetitionPage = () => {
     location: "",
     goal: 100,
     description: "",
-    image: null, // local File before upload
+    image: null, 
   });
 
   const handleChange = (e) => {
