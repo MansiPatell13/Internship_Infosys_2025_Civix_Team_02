@@ -124,10 +124,10 @@ function Dashboard() {
           <img src="/logo.png" alt="Logo" style={{ width: '95px', height: '45px' }} />
         </div>
         <div className="nav-center">
-          <a href="#" className="n1">Home</a>
-          <a href="#" className="n1">Petitions</a>
-          <a href="#" className="n1">Polls</a>
-          <a href="#" className="n1">Reports</a>
+          <Link to="/dashboard" className="n1">Home</Link>
+          <Link to="/petitions" className="n1">Petitions</Link>
+          <Link to="/pollsfilter" className="n1">Polls</Link>
+          <Link to="/reports" className="n1">Reports</Link>
         </div>
         <div className="nav-right">
           <FaUserCircle size={50} className="nr" />
@@ -164,7 +164,7 @@ function Dashboard() {
               Create a Petition
             </Link>
 
-            <Link to="/create-poll" className="o1 o3" style={{ display: "flex", alignItems: "center" }}>
+            <Link to="/pollsfilter" className="o1 o3" style={{ display: "flex", alignItems: "center" }}>
               <MdOutlinePoll style={{ marginRight: "7px" }} />
               Create a Poll
             </Link>
@@ -307,7 +307,7 @@ function Dashboard() {
             <h4>Quick Links</h4>
             <Link to="/dashboard" className="f1">Home</Link>
             <Link to="/petitions" className="f1">Petitions</Link>
-            <Link to="/polls" className="f1">Polls</Link>
+            <Link to="/pollsfilter" className="f1">Polls</Link>
             <Link to="/reports" className="f1">Reports</Link>
             <Link to="/settings" className="f1">Settings</Link>
             <Link to="/help" className="f1">Help & Support</Link>
