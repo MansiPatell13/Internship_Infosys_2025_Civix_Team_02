@@ -1,45 +1,54 @@
+// Load environment variables first
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
-import Petition from "../models/Petition.js";
+import mongoose from "mongoose";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
+import Petition from "../models/Petition.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Fix __dirname in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// ---------------- MONGODB ----------------
+const mongoURI = process.env.MONGO_URI;
+if (!mongoURI) throw new Error("MONGO_URI is not defined in .env");
 
-// Absolute path for uploads folder
-const uploadDir = path.join(__dirname, "../../uploads");
-
-// Ensure uploads folder exists
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Multer storage config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) =>
-    cb(null, Date.now() + path.extname(file.originalname)),
+const conn = mongoose.createConnection(mongoURI, {
+  dbName: process.env.MONGO_DB || "civix",
 });
+
+conn.once("open", () => {
+  console.log(" MongoDB connected successfully");
+});
+
+// ---------------- MULTER (Memory Storage) ----------------
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
+
+// ---------------- ROUTES ----------------
 
 // Create petition
 router.post("/", requireAuth, upload.single("image"), async (req, res, next) => {
   try {
-    const { title, description, category, location, signatureGoal } = req.body;
+    let fileId = null;
+    if (req.file) {
+      const bucket = new mongoose.mongo.GridFSBucket(conn.db, { bucketName: "uploads" });
+      const uploadStream = bucket.openUploadStream(req.file.originalname, {
+        contentType: req.file.mimetype,
+      });
+      uploadStream.end(req.file.buffer);
+      fileId = uploadStream.id;
+    }
 
+    const { title, description, category, location, signatureGoal } = req.body;
     const petition = new Petition({
       title,
       description,
       category,
       location,
       signatureGoal,
-      image: req.file ? `/uploads/${req.file.filename}` : null, // public URL
+      image: fileId,
       createdBy: req.user.id,
     });
 
@@ -50,7 +59,7 @@ router.post("/", requireAuth, upload.single("image"), async (req, res, next) => 
   }
 });
 
-// Get petitions with filters
+// Get all petitions
 router.get("/", async (req, res, next) => {
   try {
     const { category, location, status } = req.query;
@@ -59,10 +68,7 @@ router.get("/", async (req, res, next) => {
     if (location) filter.location = location;
     if (status) filter.status = status;
 
-    const petitions = await Petition.find(filter).populate(
-      "createdBy",
-      "name email"
-    );
+    const petitions = await Petition.find(filter).populate("createdBy", "name email");
     res.json(petitions);
   } catch (err) {
     next(err);
@@ -72,10 +78,7 @@ router.get("/", async (req, res, next) => {
 // Get single petition
 router.get("/:id", async (req, res, next) => {
   try {
-    const petition = await Petition.findById(req.params.id).populate(
-      "createdBy",
-      "name email"
-    );
+    const petition = await Petition.findById(req.params.id).populate("createdBy", "name email");
     if (!petition) return res.status(404).json({ message: "Petition not found" });
     res.json(petition);
   } catch (err) {
@@ -86,12 +89,18 @@ router.get("/:id", async (req, res, next) => {
 // Update petition
 router.put("/:id", requireAuth, upload.single("image"), async (req, res, next) => {
   try {
-    const updates = req.body;
-    if (req.file) updates.image = `/uploads/${req.file.filename}`;
+    const updates = { ...req.body };
 
-    const petition = await Petition.findByIdAndUpdate(req.params.id, updates, {
-      new: true,
-    });
+    if (req.file) {
+      const bucket = new mongoose.mongo.GridFSBucket(conn.db, { bucketName: "uploads" });
+      const uploadStream = bucket.openUploadStream(req.file.originalname, {
+        contentType: req.file.mimetype,
+      });
+      uploadStream.end(req.file.buffer);
+      updates.image = uploadStream.id;
+    }
+
+    const petition = await Petition.findByIdAndUpdate(req.params.id, updates, { new: true });
     if (!petition) return res.status(404).json({ message: "Petition not found" });
 
     res.json(petition);
@@ -117,6 +126,22 @@ router.post("/:id/sign", requireAuth, async (req, res, next) => {
       message: "Signed successfully",
       totalSignatures: petition.signatures.length,
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Serve image by GridFS ID
+router.get("/image/:id", async (req, res, next) => {
+  try {
+    const fileId = new mongoose.Types.ObjectId(req.params.id);
+    const bucket = new mongoose.mongo.GridFSBucket(conn.db, { bucketName: "uploads" });
+
+    const files = await bucket.find({ _id: fileId }).toArray();
+    if (!files || files.length === 0) return res.status(404).json({ message: "File not found" });
+
+    res.set("Content-Type", files[0].contentType || "image/jpeg");
+    bucket.openDownloadStream(fileId).pipe(res);
   } catch (err) {
     next(err);
   }

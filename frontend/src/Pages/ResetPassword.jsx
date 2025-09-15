@@ -1,89 +1,122 @@
-import React,{useState} from 'react'
-import "bootstrap/dist/css/bootstrap.min.css";
-import img from "/img.jpg";
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import './resetpassword.css';
 
-const ResetPassword = () => {
-     const [password, setpassword] = useState("");
-    const [confirmPassword, setconfirmPassword] = useState("");
-    const [error, seterror] = useState("");
+function ResetPassword() {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const validatePass = (pass) => {
-        const rules = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-        return rules.test(pass);
-    };
+  const { sessionId, email } = location.state || {};
 
-    const handleSubmit = (e) =>{
-        e.preventDefault(e);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-        if(!validatePass(password)){
-            seterror("Password must be at least 8 characters, include uppercase, lowercase, and a number.");
-            setpassword("");
-            setconfirmPassword("");
-        }
-        else if(password !== confirmPassword){
-            seterror("Passwords do not match");
-        }
-        else{
-            seterror("");
-            setpassword("");
-            setconfirmPassword("");
-            alert("Password set successfully!");
-        }
-    };
+  const handleResetClick = async () => {
+    setError('');
+
+    if (!sessionId) {
+      setError('Session expired or invalid. Please verify OTP again.');
+      return;
+    }
+
+    if (!newPassword || !confirmPassword) {
+      setError('Please fill in both password fields.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:4000/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, newPassword }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Redirect to login on success
+        navigate('/login');
+      } else {
+        setError(data.message || 'Failed to reset password.');
+      }
+    } catch (err) {
+      console.error('Error resetting password:', err);
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="container-fluid vh-100">
-      <div className="row h-100">
-        {/* left */}
-        <div className="col-md-6 d-flex flex-column justify-content-center p-5">
-          <div className="">
-          <h1 className="fw-bold text-center">
-            RESET <span className="text-success">PASSWORD</span>
-          </h1>
-        </div>
-        <form className="mx-auto mt-4" style={{ maxWidth: "400px" }} onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label mb-3">Enter new Password</label>
-            <input
-              type="password"
-              placeholder="********"
-              className="form-control border-black"
-              value={password}
-              onChange={(e) => {setpassword(e.target.value)}}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label mb-3">Confirm Password</label>
-            <input
-              type="password"
-              placeholder="********"
-              className="form-control border-black"
-              value={confirmPassword}
-              onChange={(e) => {setconfirmPassword(e.target.value)}}
-              required
-            />
-          </div>
-
-            {error && <p className='text-danger'>{error}</p>}
-            
-          <button type="submit" className="btn btn-success w-100 mt-3">
-            Reset Password
-          </button>
-        </form>
+    <div className="reset-container">
+      <div>
+        <img src="/logo.png" alt="Logo" className="reset-logo" />
       </div>
 
-      {/* right */}
-      <div className="col-md-6 p-0 h-100">
-                <img
-                  src={img}
-                  alt="img"
-                  className="w-100 h-100"
-                  style={{ objectFit: "cover" }}
-                />
-              </div>
-            </div>
+      <div className="reset-left">
+        <h2 className="reset-heading">
+          <span className="black-bold">Reset</span> <span className="green">Password</span>
+        </h2>
+        <p className="reset-instructions">Enter and confirm your new password</p>
+
+        <div className="reset-form">
+          <div className="reset-field">
+            <label htmlFor="newPassword" className="reset-label">Enter New Password</label>
+            <input
+              type="password"
+              id="newPassword"
+              className="reset-input"
+              placeholder="********"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
           </div>
-  )
+
+          <div className="reset-field">
+            <label htmlFor="confirmPassword" className="reset-label">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              className="reset-input"
+              placeholder="********"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
+
+          <button
+            className="reset-button"
+            onClick={handleResetClick}
+            disabled={loading}
+          >
+            {loading ? 'Resetting...' : 'Reset Password'}
+          </button>
+        </div>
+      </div>
+
+      <div className="reset-right">
+        <img src="/map.png" alt="Map" />
+      </div>
+    </div>
+  );
 }
 
-export default ResetPassword
+export default ResetPassword;

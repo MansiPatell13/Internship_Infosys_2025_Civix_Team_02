@@ -3,6 +3,7 @@ import { FaPencilAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Footer from "../Landing/Footer";
 import Navbar from "../Landing/Navbar";
+import styles from "./PetitionPage.module.css";
 
 const PetitionPage = () => {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ const PetitionPage = () => {
     location: "",
     goal: 100,
     description: "",
-    image: null, // store the actual File instead of base64
+    image: null, // local File before upload
   });
 
   const handleChange = (e) => {
@@ -38,13 +39,11 @@ const PetitionPage = () => {
         return;
       }
 
-      // Validation
       if (!petition.title || !petition.description || !petition.location) {
         alert("Please fill in title, description, and location.");
         return;
       }
 
-      // Build FormData for text + file
       const formData = new FormData();
       formData.append("title", petition.title);
       formData.append("description", petition.description);
@@ -58,7 +57,7 @@ const PetitionPage = () => {
       const res = await fetch("http://localhost:4000/api/petitions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`, // DO NOT set Content-Type with FormData
+          Authorization: `Bearer ${token}`, // don't set Content-Type
         },
         body: formData,
       });
@@ -71,8 +70,11 @@ const PetitionPage = () => {
       const data = await res.json();
       console.log("✅ Petition created:", data);
 
+      // store ObjectId returned by backend
+      setPetition((prev) => ({ ...prev, image: data.image }));
+
       alert("Petition created successfully!");
-      navigate("/petition-head"); // redirect to petition list
+      navigate("/petition-head");
     } catch (error) {
       console.error("❌ Error creating petition:", error);
       alert("Error creating petition: " + error.message);
@@ -82,80 +84,68 @@ const PetitionPage = () => {
   return (
     <>
       <Navbar />
-      <div className="container my-5">
-        <button className="btn btn-light mb-3" onClick={() => navigate(-1)}>
+      <div className={styles.container}>
+        <button className={styles.backButton} onClick={() => navigate(-1)}>
           ← Back
         </button>
-        <div className="card p-4 shadow">
-          <div className="row mb-4 align-items-center">
-            <div className="col">
-              <h1 className="fw-bold">Petition Creation</h1>
+        <div className={styles.card}>
+          <div className={styles.headerRow}>
+            <div>
+              <h1 className={styles.headerTitle}>Petition Creation</h1>
             </div>
-            <div className="col text-end">
-              <h4 className="text-success">Civix</h4>
+            <div>
+              <h4 className={styles.headerLogo}>Civix</h4>
             </div>
           </div>
 
-          <div className="mb-4 text-success fw-semibold">
-            <FaPencilAlt className="me-2" />
-            Create a new petition
+          <div className={styles.createPetition}>
+            <FaPencilAlt /> Create a new petition
           </div>
 
           {/* Title */}
-          <div className="mb-3">
-            <label className="form-label fw-bold">
-              Poll Question <span className="text-danger">*</span>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
+              Poll Question <span className={styles.required}>*</span>
             </label>
             <input
               type="text"
-              className="form-control"
+              className={styles.formControl}
               placeholder="Give a title to your Petition"
               name="title"
               value={petition.title}
               onChange={handleChange}
               required
             />
-            <small className="text-muted">
-              Clearly define what change you want to see
-            </small>
           </div>
 
           {/* Category + Location */}
-          <div className="row mb-3">
-            <div className="col-md-6">
-              <label className="form-label fw-bold">Category</label>
+          <div className={`${styles.formGroup} ${styles.formRow}`}>
+            <div className={styles.col}>
+              <label className={styles.formLabel}>Category</label>
               <select
-                className="form-select"
+                className={styles.formSelect}
                 name="category"
                 value={petition.category}
                 onChange={handleChange}
               >
-                <option value="">Select a category</option>
+                <option>All Categories</option>
                 <option value="Environment">Environment</option>
-                <option value="Transport">Transport</option>
+                <option value="Transport">Transportation</option>
                 <option value="Education">Education</option>
-                <option value="Health & Safety">Health & Safety</option>
-                <option value="Local Government & Policy">
-                  Local Government & Policy
-                </option>
-                <option value="Community & Social Issues">
-                  Community & Social Issues
-                </option>
-                <option value="Infrastructure & Utilities">
-                  Infrastructure & Utilities
-                </option>
-                <option value="Public Services">Public Services</option>
-                <option value="Animal Welfare">Animal Welfare</option>
+                <option value="Health & Safety">Public Safety</option>
+                <option value="Local Government & Policy">Healthcare</option>
+                <option value="Community & Social Issues">Infrastructure</option>
+                <option value="Community & Social Issues">Animal Welfare</option>
               </select>
             </div>
 
-            <div className="col-md-6">
-              <label className="form-label fw-bold">
-                Location <span className="text-danger">*</span>
+            <div className={styles.col}>
+              <label className={styles.formLabel}>
+                Location <span className={styles.required}>*</span>
               </label>
               <input
                 type="text"
-                className="form-control"
+                className={styles.formControl}
                 placeholder="Search location"
                 name="location"
                 value={petition.location}
@@ -166,30 +156,27 @@ const PetitionPage = () => {
           </div>
 
           {/* Goal */}
-          <div className="row mb-3">
-            <div className="col-md-6">
-              <label className="form-label fw-bold">Signature Goal</label>
+          <div className={`${styles.formGroup} ${styles.formRow}`}>
+            <div className={styles.col}>
+              <label className={styles.formLabel}>Signature Goal</label>
               <input
                 type="number"
-                className="form-control"
+                className={styles.formControl}
                 placeholder="100"
                 name="goal"
                 value={petition.goal}
                 onChange={handleChange}
               />
-              <small className="text-muted">
-                How many signatures you want to collect?
-              </small>
             </div>
           </div>
 
           {/* Description */}
-          <div className="mb-4">
-            <label className="form-label fw-bold">
-              Description <span className="text-danger">*</span>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
+              Description <span className={styles.required}>*</span>
             </label>
             <textarea
-              className="form-control"
+              className={styles.formControl}
               rows={4}
               placeholder="Describe the issue and change you would like to see..."
               name="description"
@@ -199,10 +186,30 @@ const PetitionPage = () => {
             ></textarea>
           </div>
 
+          {/* Image Upload + Preview */}
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>Upload Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              className={styles.formControl}
+              onChange={handleImageChange}
+            />
+            {petition.image && typeof petition.image !== "string" && (
+              <div className={styles.imagePreview}>
+                <p className={styles.formLabel}>Preview:</p>
+                <img
+                  src={URL.createObjectURL(petition.image)}
+                  alt="Petition Preview"
+                  className={styles.previewImage}
+                />
+              </div>
+            )}
+          </div>
 
           {/* Publish button */}
-          <div className="d-flex justify-content-between">
-            <button className="btn btn-success" onClick={handlePublish}>
+          <div className={styles.formActions}>
+            <button className={styles.primaryButton} onClick={handlePublish}>
               Publish
             </button>
           </div>

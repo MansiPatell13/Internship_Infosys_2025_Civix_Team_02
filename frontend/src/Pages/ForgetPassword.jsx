@@ -1,55 +1,92 @@
-import React from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import img from "/img.jpg";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import './forget.css';
 
-const ForgetPassword = () => {
+function ForgotPassword() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleContinueClick = async () => {
+    setError("");
+    setSuccess("");
+    if (!email) {
+      setError("Please enter your email");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:4000/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Failed to send OTP");
+      } else {
+        setSuccess("OTP sent to your email");
+        // Navigate to OTP verification after a short delay (optional)
+        setTimeout(() => {
+          navigate('/otpverification', { state: { email } });
+        }, 1000);
+      }
+    } catch (err) {
+      setError("Network error. Try again.");
+    }
+    setLoading(false);
+  };
+
   return (
-    <>
-    <div className="container-fluid vh-100">
-        <div className="row h-100">
-        {/* left */}
-        <div className="col-md-6 d-flex flex-column justify-content-center p-5">
-          <div className="">
-            <h1 className="fw-bold text-center">
-              FORGET <span className="text-success">PASSWORD</span>
-            </h1>
-            <p className="text-muted text-center">
-              Please write your email to receive a confirmation code to set a
-              new password.
-            </p>
-          </div>
-          <form className="mx-auto mt-4" style={{ maxWidth: "800px" }}>
-            <div className="mb-3">
-              <label className="form-label mb-3">Email</label>
-              <input
-                type="email"
-                placeholder="your@mail.com"
-                className="form-control border-black w-100"
-                required
-              />
-            </div>
+    <div className="forgot-container">
+      <div>
+        <img src="/logo.png" alt="Logo" style={{ width: '95px', height: '45px', margin: '1rem' }} />
+      </div>
 
-            <button type="submit" className="btn btn-success w-100" onClick={() => {navigate("/otp")}}>
-              Continue
-            </button>
-          </form>
-        </div>
+      <div className="forgot-left">
+        <h2 className="forgot-title">
+          <span className="green">Forgot</span> Password
+        </h2>
+        <p className="forgot-description">
+          Please write your email to receive a confirmation code to set a new password
+        </p>
 
-        {/* right */}
-        <div className="col-md-6 p-0 h-100">
-          <img
-            src={img}
-            alt="img"
-            className="w-100 h-100"
-            style={{ objectFit: "cover" }}
+        <div className="forgot-form">
+          <label htmlFor="email" className="forgot-label">Email :</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="your@mail.com"
+            className="forgot-input"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            disabled={loading}
           />
         </div>
+
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        {success && <p style={{ color: "green" }}>{success}</p>}
+
+        <button 
+          className="forgot-button" 
+          onClick={handleContinueClick}
+          disabled={loading}
+        >
+          {loading ? "Sending..." : "Continue"}
+        </button>
+      </div>
+
+      <div className="forgot-right">
+        <img src="/map.png" alt="Map" />
       </div>
     </div>
-    </>
   );
-};
+}
 
-export default ForgetPassword;
+export default ForgotPassword;

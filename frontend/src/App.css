@@ -4,13 +4,9 @@ html, body, #root {
 }
 
 .app-wrapper {
-   min-height: 100vh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
-}
-
-.main-content {
-  flex: 1;                    
 }
 
 .heroSection{
@@ -32,13 +28,12 @@ html, body, #root {
 
 .foot{
   background-color: #448244;
-  /* bottom: 0;
+  bottom: 0;
   left: 0;
-  position: relative; */
+  position: relative;
   width: 100%;
   padding: 3px 0;
   color: white;
-  margin-top: auto;
 }
 
 .left{

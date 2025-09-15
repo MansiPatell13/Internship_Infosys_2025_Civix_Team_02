@@ -1,110 +1,119 @@
-import React from "react";
-import img from "/img.jpg";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../Components/Landing/Navbar";
-import Footer from "../Components/Landing/Footer";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import './login.css';
 
-const Login = () => {
-    const navigate = useNavigate(); 
+function Login() {
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleLoginClick = async () => {
+    setError('');
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:4000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        navigate('/dashboard');
+      } else {
+        setError(data.message || 'Login failed');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again later.');
+      console.error(err);
+    }
+  };
 
   return (
-    <>
-    <Navbar/>
-    <div className="container-fluid vh-100">
-      <div className="row h-100">
-        {/* left */}
-        <div className="col-md-6 d-flex flex-column justify-content-center align-items-center p-5">
-          <div className="">
-            <h1 className="fw-bold text-center">
-              WELCOME <span className="text-success">BACK</span>
-            </h1>
-            <p className="text-muted text-center">
-              Join our platform to make your voice heard
-            </p>
-          </div>
+    <div className='login'>
+      <div>
+        <img src='/logo.png' style={{ width: '95px', height: '45px', margin: '1rem' }} />
+      </div>
+      <div className='login1'>
+        <h2 className='heading'><span className='green'>Welcome</span> Back!</h2>
+        <p className='para'>Join our platform to make your voice heard</p>
 
-          <div className="btn-group w-50 d-flex flex-colum mb-3">
-            <button className="btn btn-outline-grey active">Log In</button>
-            <button className="btn btn-outline-dark" onClick={() => {navigate("/signup")}}>Sign Up</button>
-          </div>
-
-          <button className="btn btn-outline-secondary border-black w-50 d-flex flex-colum mb-3 d-flex align-items-center justify-content-center">
-            <img
-              src="https://developers.google.com/identity/images/g-logo.png"
-              alt="google"
-              style={{ width: "20px", marginRight: "10px" }}
-            />
-            Login with Google
-          </button>
-
-          <div className="d-flex align-items-center mb-3 w-50 d-flex flex-colum">
-            <hr className="flex-grow-1" />
-            <span className="px-2 text-muted">Or</span>
-            <hr className="flex-grow-1" />
-          </div>
-
-
-            <div className="input-group mb-3 w-50 ">
-              <label className="form-label mb-3">Email</label>
-              <input
-                type="email"
-                placeholder="your@mail.com"
-                className="form-control border-black w-100"
-                required
-              />
-            </div>
-
-            <div className="input-group mb-3 w-50 ">
-              <label className="form-label mb-3">Password</label>
-              <input
-                type="password"
-                placeholder="********"
-                className="form-control border-black w-100"
-                required
-              />
-            </div>
-            <p className="text-muted text-center mt-3">
-            Forget Password? <a href="#" onClick={() => {navigate("/forget-password")}}>Click here</a>
-          </p>
-
-            <div className="form-check mb-3 ">
-              <input
-                className="form-check-input border-black"
-                type="checkbox"
-                value=""
-                id="flexCheckDefault"
-              />
-              <label className="form-check-label " htmlFor="flexCheckDefault">
-                Remember Me
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-success w-50 d-flex flex-column"
-            >
-              Log In
-            </button>
-            
-          <p className="text-muted text-center mt-3">
-            Don’t have an account? <a href="#" onClick={() => {navigate("/signup")}}>Register here</a>
-          </p>
+        <div className='but'>
+          <Link to="/login" className='b'>Login</Link>
+          <Link to="/signup" className='b'>Sign Up</Link>
         </div>
 
-        {/* right */}
-        <div className="col-md-6 p-0 h-100">
+        <button className='but1'>
           <img
-            src={img}
-            alt="img"
-            className="w-100 h-100"
-            style={{ objectFit: "cover" }}
+            src="https://developers.google.com/identity/images/g-logo.png"
+            alt="Google logo"
+            style={{ width: '20px', height: '20px' }}
           />
+          Login with Google
+        </button>
+
+        <div className='h'>
+          <hr /><span>OR</span><hr />
+        </div>
+
+        <div className='container'>
+          <div className='field'>
+            <label htmlFor="email" className='content'>Email :</label>
+            <input
+              type="text"
+              id="email"
+              name="email"
+              placeholder='your@mail.com'
+              className='content1'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className='field'>
+            <label htmlFor="password" className='content'>Password :</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder='********'
+              className='content1'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <div className='r field'>
+            <input type="checkbox" id="rememberme" name="rememberme" />
+            <label htmlFor="rememberme">Remember Me</label>
+            <Link to="/forgot" style={{ marginLeft: '2rem' }} className='r1'>Forgot Password?</Link>
+          </div>
+        </div>
+
+        {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
+
+        <div>
+          <button className='but3' onClick={handleLoginClick}>Login</button>
+        </div>
+
+        <div>
+          <p>Don't have an account? <Link to="/signup" className='r1'>Register Here</Link></p>
         </div>
       </div>
+
+      <div className='login1 h'>
+        <img src='/map.png' alt="Map" className='img' />
+      </div>
     </div>
-    <Footer/>
-    </>
   );
-};
+}
 
 export default Login;
