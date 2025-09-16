@@ -8,10 +8,13 @@ import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
 import { connectDB } from "./src/config/db.js";
+
+// Routes
 import authRoutes from "./src/routes/auth.routes.js";
 import dashboardRoutes from "./src/routes/dashboard.routes.js";
 import forgotPasswordRoutes from "./src/routes/forgotPassword.routes.js";
 import petitionRoutes from "./src/routes/petition.routes.js";
+import pollRoutes from "./src/routes/poll.routes.js"; // Added poll routes
 
 const app = express();
 
@@ -32,9 +35,10 @@ app.use("/api/petitions", petitionRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/auth", forgotPasswordRoutes);
+app.use("/api/polls", pollRoutes); //  New Poll APIs route
 
 // Health check route
-app.get("/", (req, res) => res.json({ ok: true, service: "Civix Auth" }));
+app.get("/", (req, res) => res.json({ ok: true, service: "Civix Backend" }));
 
 // Start server
 const PORT = process.env.PORT || 4000;
@@ -42,11 +46,11 @@ connectDB()
   .then(() => {
     console.log(" MongoDB connected successfully");
     app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(` Server running on http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
-    console.error("Failed to connect DB:", err);
+    console.error(" Failed to connect DB:", err);
     process.exit(1);
   });
 

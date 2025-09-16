@@ -10,7 +10,7 @@ import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// ---------------- MONGODB ----------------
+//  MONGODB 
 const mongoURI = process.env.MONGO_URI;
 if (!mongoURI) throw new Error("MONGO_URI is not defined in .env");
 
@@ -22,11 +22,11 @@ conn.once("open", () => {
   console.log(" MongoDB connected successfully");
 });
 
-// ---------------- MULTER (Memory Storage) ----------------
+//   MULTER (Memory Storage) 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// ---------------- ROUTES ----------------
+// ROUTES 
 
 // Create petition
 router.post("/", requireAuth, upload.single("image"), async (req, res, next) => {
