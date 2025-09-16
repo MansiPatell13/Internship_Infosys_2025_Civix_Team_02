@@ -43,7 +43,7 @@ router.post(
 );
 
 /**
- * 📌 Get Poll List (citizens + officials can view)
+ *  Get Poll List (citizens + officials can view)
  * Optional filters: ?location=CityName&createdBy=userId&page=1&limit=10
  */
 router.get("/list", requireAuth, async (req, res) => {
@@ -74,7 +74,7 @@ router.get("/list", requireAuth, async (req, res) => {
 });
 
 /**
- * 📌 Get Poll Details (with aggregated votes)
+ *  Get Poll Details (with aggregated votes)
  */
 router.get("/:id", requireAuth, async (req, res) => {
   try {
@@ -100,7 +100,7 @@ router.get("/:id", requireAuth, async (req, res) => {
 });
 
 /**
- * 📌 Vote on Poll (citizens only, one vote per poll)
+ *  Vote on Poll (citizens only, one vote per poll)
  */
 router.post("/:id/vote", requireAuth, async (req, res) => {
   try {
