@@ -1,0 +1,51 @@
+/* Footer.module.css */
+.footer {
+  background-color: #448244;
+  padding: 1rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.textCenter {
+  text-align: center;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.tagline {
+  font-size: 1rem;
+  font-style: italic;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.copyright {
+  font-size: 0.875rem;
+  color: white;
+  margin: 0;
+}
+
+.foot {
+  /* You can add specific footer styles here if needed */
+}
+
+.mb0 {
+  margin-bottom: 0 !important;
+}
+
+/* Responsive styles for mobile */
+@media (max-width: 768px) {
+  .footer {
+    padding: 0.75rem 0;
+  }
+  .tagline {
+    font-size: 0.9rem;
+  }
+  .copyright {
+    font-size: 0.75rem;
+  }
+}
