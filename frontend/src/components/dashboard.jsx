@@ -125,7 +125,7 @@ function Dashboard() {
         </div>
         <div className="nav-center">
           <Link to="/dashboard" className="n1">Home</Link>
-          <Link to="/petitions" className="n1">Petitions</Link>
+          <Link to="/petitionhead" className="n1">Petitions</Link>
           <Link to="/pollsfilter" className="n1">Polls</Link>
           <Link to="/reports" className="n1">Reports</Link>
         </div>
@@ -159,7 +159,7 @@ function Dashboard() {
               Dashboard
             </Link>
 
-            <Link to="/create-petition" className="o1 o3" style={{ display: "flex", alignItems: "center" }}>
+            <Link to="/petitionhead" className="o1 o3" style={{ display: "flex", alignItems: "center" }}>
               <IoMdCreate style={{ marginRight: "7px" }} />
               Create a Petition
             </Link>
@@ -306,7 +306,7 @@ function Dashboard() {
           <div className="footer-section links">
             <h4>Quick Links</h4>
             <Link to="/dashboard" className="f1">Home</Link>
-            <Link to="/petitions" className="f1">Petitions</Link>
+            <Link to="/petitionhead" className="f1">Petitions</Link>
             <Link to="/pollsfilter" className="f1">Polls</Link>
             <Link to="/reports" className="f1">Reports</Link>
             <Link to="/settings" className="f1">Settings</Link>

@@ -1,5 +1,6 @@
 import React from "react";
 import img from "/issues.jpg";
+import styles from "./Mid2.module.css";
 
 const Mid2 = () => {
   const issueCategories = [
@@ -48,34 +49,25 @@ const Mid2 = () => {
     "Make In India",
   ];
   return (
-    <section className="py-5">
-      <div className="container">
-        <div className="row text-center justify-content-center">
+    <section className={styles.py5}>
+      <div className={styles.container}>
+        <div className={`${styles.row} ${styles.textCenter} ${styles.justifyContentCenter}`}>
           {/* left */}
-          <div className="col-md-6">
+          <div className={styles.colMd6}>
             <img
               src={img}
               alt="img"
-              className="img-fluid rounded"
-              style={{ objectFit: "cover", width: "100%", height: "100%" }}
+              className={`${styles.imgFluid} ${styles.rounded} ${styles.coverImage}`}
             />
           </div>
 
           {/* right */}
-          <div className="col-md-6">
-            <div className="d-flex flex-wrap gap-2 mb-4 mt-4">
+          <div className={styles.colMd6}>
+            <div className={`${styles.dFlex} ${styles.flexWrap} ${styles.gap2} ${styles.mb4} ${styles.mt4}`}>
               {issueCategories.map((category, index) => (
                 <button
                   key={index}
-                  className="btn btn-outline-secondary btn-sm px-3"
-                  style={{
-                    borderRadius: "20px",
-                    whiteSpace: "nowrap",
-                    backgroundColor: "white",
-                    border: "1px solid #dee2e6",
-                    color: "#6c757d",
-                    borderColor: "black",
-                  }}
+                  className={`${styles.btn} ${styles.btnOutlineSecondary} ${styles.btnSm} ${styles.px3} ${styles.tagButton}`}
                 >
                   {category}
                 </button>

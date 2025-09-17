@@ -9,6 +9,10 @@ import OtpVerification from './components/otpverfication.jsx';
 import ResetPassword from './components/ResetPassword.jsx';
 import Dashboard from './components/dashboard.jsx';
 import Polls from './components/poll/pollsfilter.jsx';
+import PetitionHead from './components/Petition/PetitionHead.jsx';
+import PetitionDetails from "./components/Petition/PetitionDetails";
+import PetitionCategory from "./components/Petition/PettionCategory";
+import PetitionPage from "./components/Petition/PetitionPage";
 function App() {
   
   return (
@@ -22,6 +26,10 @@ function App() {
         <Route path='/forgot' element={<Forgot/>}/>
         <Route path='/otpverification' element={<OtpVerification/>}/>
         <Route path='/resetpassword' element={<ResetPassword/>}/>
+        <Route path='/petitionhead' element={<PetitionHead/>}/>
+        <Route path="/petition/:id" element={<PetitionDetails />} />
+        <Route path="/petitions/category/:category" element={<PetitionCategory />} />
+        <Route path="/petition" element={<PetitionPage />} />
         <Route path='/pollsfilter' element={<Polls/>}/>
       </Routes>
     </Router>

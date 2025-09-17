@@ -1,0 +1,160 @@
+/* General Navbar styling */
+.navbarContainer {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  background-color: #448244;
+}
+
+.navbarContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* Logo styling */
+.navbarLogo {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #000;
+  text-decoration: none;
+}
+
+/* Links and navigation */
+.navbarLinksWrapper {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.navbarLinksList {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.navbarLinkItem {
+  margin: 0 1rem;
+}
+
+.navLink {
+  color: rgba(0, 0, 0, 0.55);
+  text-decoration: none;
+}
+
+.navLink.active {
+  color: #000;
+}
+
+.navLink:hover {
+  color: #000;
+}
+
+/* Buttons and user section */
+.navbarButtonsWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.userGreeting {
+  font-weight: 700;
+  margin-right: 1rem;
+}
+
+/* Button styling */
+.button {
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  text-decoration: none;
+  border-radius: 50rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.loginButton {
+  background-color: transparent;
+  color: #000;
+  margin-right: 0.5rem;
+}
+
+.logoutButton {
+  background-color: #dc3545;
+  color: #fff;
+  border-color: #dc3545;
+}
+
+.signupButton {
+  background-color: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+/* Responsive styles for mobile */
+@media (max-width: 992px) {
+  .navbarContent {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbarLinksWrapper {
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .navbarLinksList {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .navbarLinkItem {
+    margin: 0.5rem 0;
+    width: 100%;
+  }
+
+  .navLink {
+    display: block;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+  }
+
+  .navbarButtonsWrapper {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .userGreeting {
+    margin-bottom: 0.5rem;
+  }
+
+  .loginButton,
+  .logoutButton,
+  .signupButton {
+    width: 100%;
+    text-align: center;
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.navLink {
+  color: #333;
+  text-decoration: none;
+  padding: 8px 12px;
+  transition: 0.3s;
+}
+
+.navLink:hover {
+  color: black;
+}
+
+.active {
+      color: black;
+    font-weight: bolder;
+    border-bottom: 2px solid black;
+}
