@@ -6,6 +6,9 @@ import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 
+/**
+ * Create Poll (citizens only)
+ */
 router.post(
   "/",
   requireAuth,
@@ -43,29 +46,34 @@ router.post(
 );
 
 /**
- *  Get Poll List (citizens + officials can view)
+ * Get Poll List (citizens + officials can view)
  * Optional filters: ?location=CityName&createdBy=userId&page=1&limit=10
  */
 router.get("/list", requireAuth, async (req, res) => {
   try {
-    const { location, createdBy, page = 1, limit = 10 } = req.query;
+    let { location, createdBy, page = 1, limit = 10 } = req.query;
+
+    // ensure page + limit are numbers
+    page = parseInt(page);
+    limit = parseInt(limit);
 
     const filter = {};
-    if (location) filter.targetLocation = location;
+    if (location) filter.targetLocation = location; // matches schema
     if (createdBy) filter.createdBy = createdBy;
 
     const polls = await Poll.find(filter)
       .populate("createdBy", "name email role")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+      .limit(limit);
 
     const totalCount = await Poll.countDocuments(filter);
 
     res.json({
       count: polls.length,
       totalCount,
-      page: parseInt(page),
+      page,
+      limit,
       polls,
     });
   } catch (err) {
@@ -74,7 +82,7 @@ router.get("/list", requireAuth, async (req, res) => {
 });
 
 /**
- *  Get Poll Details (with aggregated votes)
+ * Get Poll Details (with aggregated votes)
  */
 router.get("/:id", requireAuth, async (req, res) => {
   try {
@@ -89,8 +97,9 @@ router.get("/:id", requireAuth, async (req, res) => {
     const results = {};
 
     poll.options.forEach((opt, i) => {
-      results[opt.text] = votes.filter((v) => v.selectedOption === i.toString())
-        .length;
+      results[opt.text] = votes.filter(
+        (v) => v.selectedOption === i.toString()
+      ).length;
     });
 
     res.json({ poll, results, totalVotes: votes.length });
@@ -100,7 +109,7 @@ router.get("/:id", requireAuth, async (req, res) => {
 });
 
 /**
- *  Vote on Poll (citizens only, one vote per poll)
+ * Vote on Poll (citizens only, one vote per poll)
  */
 router.post("/:id/vote", requireAuth, async (req, res) => {
   try {
