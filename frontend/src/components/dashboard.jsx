@@ -10,14 +10,30 @@ import { IoMdSettings } from "react-icons/io";
 import { CgLogOut } from "react-icons/cg";
 
 function Dashboard() {
-  // User state
+  // User and Stats state
   const [user, setUser] = useState({ name: "", email: "", location: "" });
+  const [stats, setStats] = useState({
+  petitions: 0,
+  polls: 0,
+  activeEngagements: 0,
+});
 
-  // Petitions states
+
+  // Petition state
   const [petitions, setPetitions] = useState([]);
   const [filteredPetitions, setFilteredPetitions] = useState([]);
   const [locationFilter, setLocationFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
+
+  const categories = [
+    "All Categories",
+    "Environment",
+    "Infrastructure",
+    "Education",
+    "Public Safety",
+    "Transportation",
+    "Healthcare",
+  ];
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -40,6 +56,7 @@ function Dashboard() {
 
         if (!response.ok) throw new Error("Failed to fetch user data");
         const data = await response.json();
+
         if (data.user) {
           setUser({
             name: data.user.name,
@@ -47,6 +64,15 @@ function Dashboard() {
             location: data.user.location || "Unknown",
           });
           localStorage.setItem("user", JSON.stringify(data.user));
+        }
+
+        if (data.stats) {
+  setStats({
+    petitions: data.stats.petitions || 0,
+    polls: data.stats.polls || 0,
+    activeEngagements: data.stats.activeEngagements || 0,
+  });
+
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -65,15 +91,14 @@ function Dashboard() {
         const data = await response.json();
 
         const normalizedPetitions = data.map(p => ({
-  id: p._id?.$oid || p._id || p.id,
-  title: p.title,
-  description: p.description,
-  category: p.category,
-  location: p.location,
-  image: p.image ? `http://localhost:4000${p.image}` : null,
-  status: p.status,
-}));
-
+          id: p._id?.$oid || p._id || p.id,
+          title: p.title,
+          description: p.description,
+          category: p.category,
+          location: p.location,
+          image: p.image ? `http://localhost:4000/api/petitions/image/${p.image}` : null,
+          status: p.status,
+        }));
 
         setPetitions(normalizedPetitions);
         setFilteredPetitions(normalizedPetitions);
@@ -105,16 +130,6 @@ function Dashboard() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
   };
-
-  const categories = [
-    "All Categories",
-    "Environment",
-    "Infrastructure",
-    "Education",
-    "Public Safety",
-    "Transportation",
-    "Healthcare",
-  ];
 
   return (
     <div className="dash" style={{ padding: 0, margin: 0 }}>
@@ -205,23 +220,26 @@ function Dashboard() {
             </p>
           </div>
 
-          <div className="rb">
-            <div className="rb1">
-              <h3 className="rb2"> My Petitions</h3>
-              <h2 className="rb2">0</h2>
-              <p className="rb2">petitions</p>
-            </div>
-            <div className="rb1">
-              <h3 className="rb2">Successful Petitions</h3>
-              <h2 className="rb2">0</h2>
-              <p className="rb2">or under review</p>
-            </div>
-            <div className="rb1">
-              <h3 className="rb2">Polls Created</h3>
-              <h2 className="rb2">0</h2>
-              <p className="rb2">polls</p>
-            </div>
-          </div>
+          {/* Stats section */}
+<div className="rb">
+  <div className="rb1">
+    <h3 className="rb2">My Petitions</h3>
+    <h2 className="rb2">{stats.petitions}</h2>
+    <p className="rb2">petitions you've created</p>
+  </div>
+  <div className="rb1">
+    <h3 className="rb2">My Polls</h3>
+    <h2 className="rb2">{stats.polls}</h2>
+    <p className="rb2">polls you've created</p>
+  </div>
+  <div className="rb1">
+    <h3 className="rb2">Active Engagements</h3>
+    <h2 className="rb2">{stats.activeEngagements}</h2>
+    <p className="rb2">active petitions and polls</p>
+  </div>
+</div>
+
+
 
           {/* Filters */}
           <div className="active">
@@ -322,5 +340,3 @@ function Dashboard() {
 }
 
 export default Dashboard;
-
-

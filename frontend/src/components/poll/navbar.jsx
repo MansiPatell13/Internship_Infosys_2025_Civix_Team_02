@@ -21,7 +21,7 @@ function Nav(){
             </div>
             <div className="polls-nav-center">
                       <Link to="/dashboard" className="n1">Home</Link>
-                      <Link to="/petitions" className="n1">Petitions</Link>
+                      <Link to="/petitionhead" className="n1">Petitions</Link>
                       <Link to="/pollsfilter" className="n1">Polls</Link>
                       <Link to="/reports" className="n1">Reports</Link>
             </div>

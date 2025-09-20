@@ -13,11 +13,13 @@ import PetitionHead from './components/Petition/PetitionHead.jsx';
 import PetitionDetails from "./components/Petition/PetitionDetails";
 import PetitionCategory from "./components/Petition/PettionCategory";
 import PetitionPage from "./components/Petition/PetitionPage";
+import Footer from './components/Landing/Footer.jsx';
 function App() {
   
   return (
     <Router>
       <Routes>
+      <Route path="/footer" element={<Footer />} />
         <Route path="/" element={<Navigate to="/home" />} /> 
         <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />

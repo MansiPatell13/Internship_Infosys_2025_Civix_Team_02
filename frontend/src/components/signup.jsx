@@ -153,12 +153,12 @@ function Signup() {
 
         {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
 
-        <div>
-          <button className='submit-btn' onClick={handleSignupClick}>Sign Up</button>
+        <div style={{textAlign:'center'}}>
+          <button className='submit-btn'  onClick={handleSignupClick}>Sign Up</button>
         </div>
 
         <div>
-          <p>Already have an account? <Link to="/login" className='login-link'>Login</Link></p>
+          <p style={{textAlign:'center'}}>Already have an account? <Link to="/login" className='login-link'>Login</Link></p>
         </div>
       </div>
 

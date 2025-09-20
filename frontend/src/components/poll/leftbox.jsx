@@ -46,7 +46,7 @@ function Lbox(){
                                Dashboard
                              </Link>
                  
-                             <Link to="/create-petition" className="p-o1 p-o3" style={{ display: "flex", alignItems: "center" }}>
+                             <Link to="/petitionhead" className="p-o1 p-o3" style={{ display: "flex", alignItems: "center" }}>
                                <IoMdCreate style={{ marginRight: "7px" }} />
                                Create a Petition
                              </Link>

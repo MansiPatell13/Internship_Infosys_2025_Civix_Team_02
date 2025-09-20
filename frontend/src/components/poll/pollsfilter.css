@@ -222,6 +222,8 @@ body {
 
 .k {
   margin-top: 1rem;
+  text-align: center;
+
 }
 
 .ques {
@@ -231,6 +233,7 @@ body {
   margin-top: 2rem;
   margin-left: 2rem;
   border-radius: 12px;
+  text-align: center;
 }
 
 .polls-footer {
@@ -388,4 +391,91 @@ body {
     padding: 0.3rem;
     margin: 1rem 0;
   }
+}
+.polls-display {
+  display: flex;
+  flex-wrap: wrap; 
+  gap: 20px;        
+  justify-content: flex-start; 
+}
+.poll-card {
+  background: #fff;
+  padding: 20px 25px;
+  margin: 15px 0;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  max-width: 450px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: box-shadow 0.3s ease;
+}
+
+.poll-card:hover {
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+  transform: translateY(-5px);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+  background-color: #f9fff9; /* subtle light green background on hover */
+}
+
+
+.poll-card h3 {
+  color: #1a4d1a; /* Dark green */
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+}
+
+.poll-card p {
+  color: #444;
+  line-height: 1.5;
+  margin: 6px 0;
+  font-size: 1rem;
+}
+
+.poll-card p strong {
+  font-weight: 600;
+  color: #333;
+}
+
+.poll-card a {
+  display: inline-block;
+  margin-top: 12px;
+  text-decoration: none;
+  color: #2a8f2a; /* Medium green */
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.poll-card a:hover {
+  text-decoration: underline;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+}
+
+.modal-content button:hover {
+  background-color: #1b4d2b;
 }
