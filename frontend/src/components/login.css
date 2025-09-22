@@ -1,0 +1,347 @@
+*{
+    font-family:'Times New Roman', Times, serif;
+    box-sizing: border-box;
+  }
+
+.login{
+    width: 150vh;
+    margin: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    height: 90vh;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    
+    }
+
+.green{
+    color: green;
+}
+.but {
+  flex-direction: row;
+  justify-content: center; 
+  gap: 10px; 
+  background-color: rgba(128, 128, 128, 0.127);
+  width: 50%;
+  display: flex; 
+  margin: 0 auto;
+  align-items: center;
+  margin-top: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.166);
+  height: 2.2rem;
+  margin-bottom: 0.9rem;
+}
+
+.b {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  margin: 0.1rem;
+  border-radius: 10px;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  color: black;
+  text-align: center;
+  width: 100%;
+
+}
+
+.b:hover {
+  border: 1px solid black;
+  border-radius: 20px;
+  background-color: white;
+  color: black;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.b.active {
+  background-color: green;
+  color: white;
+  border: 1px solid black;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 128, 0, 0.4);
+}
+
+
+.heading{
+    font-size: 50px;
+    font-weight: 1000;
+    margin: 0.1rem;
+    margin-top: 1rem;
+}
+
+
+.but1 {
+  height: 2.4rem;
+  width: 50%;
+  background-color: white;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #444;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  margin:auto;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+ justify-content: center;
+
+}
+
+.but1:hover {
+  background-color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 0.5px solid grey;
+}
+.but1:focus {
+  outline: none;
+
+}
+
+
+.para{
+    font-size: 20px;
+    margin: auto;
+    margin-top: 0%;
+}
+.img {
+  border-radius: 20px;
+  width: 100%;
+  object-fit: cover;
+  margin: auto;
+}
+.login1 {
+  width: 50%;
+  padding: 0.1rem;
+  margin-top: 3rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 0.6rem;
+  width: 60%;
+}
+.content1 {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.content {
+margin-bottom: 0.1rem;
+  font-weight: 500;
+
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+}
+hr {
+ flex: 1;
+  border: none;
+  border-top: 1px solid #ccc;
+
+}
+.h{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 50%;
+  align-items: center;
+  margin: auto;
+}
+.h img{
+    border-radius: 10px; 
+    object-fit: cover;
+  }
+
+.r{
+  display: flex;
+  flex-direction: row;
+  align-items: center;    
+  gap: 0.5rem;   
+}
+.but3{
+  width: 55%;
+  height: 2.2rem;
+  background-color: green;
+  color: white;
+  border: none;
+}
+.but3:focus{
+  outline:none;
+}
+.but3:hover{
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+}
+.r1:hover{
+  color: blue;
+}
+/* Responsive layout for screens smaller than 768px */
+@media (max-width: 768px) {
+  .login {
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+    align-items: center;
+  }
+
+  .login1 {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0 1rem;
+  }
+
+  .but,
+  .but1,
+  .h,
+  .container,
+  .but3 {
+    width: 100% !important;
+    max-width: 400px;
+  }
+
+  .but {
+    flex-direction: row;
+    gap: 0.5rem;
+    height: auto;
+  }
+
+  .b {
+    font-size: 16px;
+    padding: 0.5rem 0;
+    text-align: center;
+    flex: 1;
+  }
+
+  .heading {
+    font-size: 32px;
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  .para {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 1rem;
+  }
+
+  .container {
+    margin-top: 1rem;
+  }
+
+  .field {
+    width: 100%;
+  }
+
+  .content1 {
+    font-size: 15px;
+    padding: 0.5rem;
+  }
+
+  .but1 {
+    font-size: 15px;
+    padding: 0.5rem 1rem;
+    height: 2.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem auto;
+  }
+
+  .img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 1.5rem;
+  }
+
+   .r {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .r1 {
+    width: 100%;
+    text-align: center;
+    margin: 0.5rem 0 0 0;
+    display: block;
+  }
+
+  .but3 {
+    display: block;
+    margin: 1rem auto;
+    font-size: 16px;
+    height: 2.5rem;
+  }
+
+  .h {
+    flex-direction: row;
+    gap: 0.5rem;
+    margin: 1rem auto;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Further tweaks for very small devices */
+@media (max-width: 480px) {
+  .heading {
+    font-size: 26px;
+  }
+
+  .para {
+    font-size: 14px;
+  }
+
+  .but1,
+  .but3 {
+    font-size: 14px;
+    height: 2.3rem;
+  }
+
+  .b {
+    font-size: 14px;
+  }
+
+  .img {
+    margin-top: 1rem;
+    max-height: 200px;
+  }
+
+  .content1 {
+    font-size: 14px;
+  }
+}
+@media (max-width: 768px) {
+  .login1.h {
+    display: none;
+  }
+}
+
