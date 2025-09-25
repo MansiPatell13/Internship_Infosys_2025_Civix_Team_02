@@ -9,6 +9,21 @@ function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  // Function to decode JWT token
+  const decodeToken = (token) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
+  };
+
   const handleLoginClick = async () => {
     setError('');
     if (!email || !password) {
@@ -26,7 +41,27 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
+        // Store token
         localStorage.setItem('token', data.token);
+        
+        // Decode the token to extract user information
+        const decodedToken = decodeToken(data.token);
+        
+        if (decodedToken) {
+          // Create user object from token payload
+          const userObject = {
+            id: decodedToken.sub || decodedToken.id,
+            _id: decodedToken.sub || decodedToken.id,
+            email: decodedToken.email,
+            role: decodedToken.role,
+            userType: decodedToken.role
+          };
+          
+          // Store user information
+          localStorage.setItem('userId', userObject.id);
+          localStorage.setItem('user', JSON.stringify(userObject));
+        }
+        
         navigate('/dashboard');
       } else {
         setError(data.message || 'Login failed');
@@ -117,4 +152,3 @@ function Login() {
 }
 
 export default Login;
-

@@ -3,9 +3,9 @@ import './pollsfilter.css';
 import { FaUserCircle } from "react-icons/fa";
 import { IoLocationSharp } from "react-icons/io5";
 import { IoIosMail, IoIosAddCircleOutline } from "react-icons/io";
-import Nav from "../Landing/Navbar.jsx";
+import Nav from "../Landing/Footer.jsx";
 import Lbox from "./leftbox.jsx";
-import Foot from "../Landing/Footer.jsx";
+import Foot from "../Landing/Navbar.jsx";
 
 function Polls() {
   const [user, setUser] = useState({ name: "", _id: "" });

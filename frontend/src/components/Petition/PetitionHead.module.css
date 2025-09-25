@@ -841,3 +841,38 @@
 .box{
   background-color: #ffffff;
 }
+
+
+.popupOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.popup {
+  background: #fff;
+  padding: 28px 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+  min-width: 300px;
+  text-align: center;
+  font-size: 1.1rem;
+}
+.popupCloseBtn {
+  margin-top: 18px;
+  background: #6ebbd1;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 22px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.popupCloseBtn:hover {
+  background: #4fa3c7;
+}

@@ -13,40 +13,76 @@ const PetitionHead = () => {
   const [category, setCategory] = useState("All Categories");
   const [currentPage, setCurrentPage] = useState(1);
   const [petitionsPerPage] = useState(8);
+  const [popup, setPopup] = useState("");
 
-  const userId = localStorage.getItem("userId") || "";
-  const userObject = JSON.parse(localStorage.getItem("user") || "{}");
+  // Function to decode JWT token
+  const decodeToken = (token) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
+  };
+
+  // Get user info with fallback to token decoding
+  const getUserInfo = () => {
+    let userId = localStorage.getItem("userId") || "";
+    let userObject = {};
+    
+    try {
+      userObject = JSON.parse(localStorage.getItem("user") || "{}");
+    } catch (error) {
+      userObject = {};
+    }
+
+    // If localStorage doesn't have user info, try to get it from token
+    if (!userId || Object.keys(userObject).length === 0) {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const decodedToken = decodeToken(token);
+        if (decodedToken) {
+          userId = decodedToken.sub || decodedToken.id || "";
+          userObject = {
+            id: decodedToken.sub || decodedToken.id,
+            _id: decodedToken.sub || decodedToken.id,
+            email: decodedToken.email,
+            role: decodedToken.role,
+            userType: decodedToken.role
+          };
+          
+          // Update localStorage for future use
+          localStorage.setItem("userId", userId);
+          localStorage.setItem("user", JSON.stringify(userObject));
+        }
+      }
+    }
+
+    return { userId, userObject };
+  };
+
+  const { userId, userObject } = getUserInfo();
   const userType = userObject.userType || userObject.role || "citizen";
 
-  // FIXED: Updated isOfficial logic - check name, userType, and role
   const isOfficial =
-    // Check userType and role fields
-    userType === "official" || 
-    userType === "government" || 
+    userType === "official" ||
+    userType === "government" ||
     userType === "admin" ||
     userType.startsWith("admin") ||
-    (userObject.role && (
-      userObject.role === "official" || 
-      userObject.role === "government" || 
-      userObject.role === "admin" ||
-      userObject.role.startsWith("admin")
-    )) ||
-    // ADDED: Check if name contains "official", "admin", or "government"
-    (userObject.name && (
-      userObject.name.toLowerCase().includes("official") ||
-      userObject.name.toLowerCase().includes("admin") ||
-      userObject.name.toLowerCase().includes("government")
-    ));
-
-  // Enhanced debugging
-  console.log("Debug - userId:", userId);
-  console.log("Debug - Full userObject:", userObject);
-  console.log("Debug - userObject.name:", userObject.name);
-  console.log("Debug - userType:", userType);
-  console.log("Debug - userObject.role:", userObject.role);
-  console.log("Debug - isOfficial:", isOfficial);
-  console.log("Debug - name includes official:", userObject.name?.toLowerCase().includes("official"));
-  console.log("Debug - name includes admin:", userObject.name?.toLowerCase().includes("admin"));
+    (userObject.role &&
+      (userObject.role === "official" ||
+        userObject.role === "government" ||
+        userObject.role === "admin" ||
+        userObject.role.startsWith("admin"))) ||
+    (userObject.name &&
+      (userObject.name.toLowerCase().includes("official") ||
+        userObject.name.toLowerCase().includes("admin") ||
+        userObject.name.toLowerCase().includes("government")));
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -69,7 +105,6 @@ const PetitionHead = () => {
       const data = await res.json();
       setPetitions(data || []);
     } catch (error) {
-      console.error("Error fetching petitions:", error);
       setPetitions([]);
     } finally {
       setLoading(false);
@@ -81,29 +116,32 @@ const PetitionHead = () => {
   }, []);
 
   const isUserOwnPetition = (petition) => {
-    let creatorId;
-    if (typeof petition.createdBy === "object" && petition.createdBy !== null) {
-      creatorId = petition.createdBy._id?.toString() || petition.createdBy.toString();
-    } else {
-      creatorId = petition.createdBy?.toString();
-    }
-    return creatorId === userId || creatorId === userObject._id;
+    let creatorId =
+      petition.createdBy?._id?.toString() ||
+      petition.createdBy?.toString() ||
+      petition.ownerId?._id?.toString() ||
+      petition.ownerId?.toString() ||
+      "";
+
+    return (
+      creatorId === userId ||
+      creatorId === userObject._id ||
+      creatorId === userObject.id
+    );
   };
 
   const isUserSignedPetition = (petition) => {
-    if (!petition.signatures || !Array.isArray(petition.signatures)) {
-      return false;
-    }
-    const isSigned = petition.signatures.some((sig) => {
-      let sigId;
-      if (typeof sig === "object" && sig !== null) {
-        sigId = sig._id?.toString() || sig.toString();
-      } else {
-        sigId = sig?.toString();
-      }
-      return sigId === userId || sigId === userObject._id;
+    const arr = petition.signatures || petition.signedBy || [];
+    if (!Array.isArray(arr)) return false;
+    
+    return arr.some((sig) => {
+      let sigId = sig?._id?.toString() || sig?.toString() || "";
+      return (
+        sigId === userId ||
+        sigId === userObject._id ||
+        sigId === userObject.id
+      );
     });
-    return isSigned;
   };
 
   const filteredPetitions = petitions
@@ -148,12 +186,9 @@ const PetitionHead = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("You must be logged in to update petition status.");
+        setPopup("You must be logged in to update petition status.");
         return;
       }
-      
-      console.log(`Updating petition ${petitionId} to status: ${newStatus}`);
-      
       const res = await fetch(
         `http://localhost:4000/api/petitions/${petitionId}`,
         {
@@ -170,62 +205,54 @@ const PetitionHead = () => {
         const err = await res.json();
         throw new Error(err.message || "Failed to update petition status");
       }
-      
-      const updatedPetition = await res.json();
-      console.log("Updated petition:", updatedPetition);
-      
-      setPetitions((prev) =>
-        prev.map((p) => 
-          p._id === petitionId 
-            ? { ...p, status: newStatus } 
-            : p
-        )
-      );
-      
-      alert(`Petition status updated to ${newStatus}!`);
-      
+
+      setPopup(`Petition status updated to ${newStatus}!`);
       await fetchPetitions();
     } catch (error) {
-      console.error("Error updating petition status:", error);
-      alert("Error updating petition status: " + error.message);
+      setPopup("Error updating petition status: " + error.message);
     }
   };
 
-const handleSign = async (id) => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("You must be logged in to sign a petition.");
-      return;
+  const handleSign = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setPopup("You must be logged in to sign a petition.");
+        return;
+      }
+
+      const res = await fetch(`http://localhost:4000/api/petitions/${id}/sign`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        setPopup(errorData.message || "Failed to sign petition");
+        return;
+      }
+
+      // Update the petition in the state
+      setPetitions((prev) =>
+        prev.map((p) => {
+          if (p._id === id) {
+            return {
+              ...p,
+              signatures: [...(p.signatures || []), userId]
+            };
+          }
+          return p;
+        })
+      );
+
+      setPopup("Petition signed successfully!");
+    } catch (error) {
+      setPopup("Error signing petition: " + error.message);
     }
-
-    const res = await fetch(`http://localhost:4000/api/petitions/${id}/sign`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText || "Failed to sign petition");
-    }
-
-    const updatedPetition = await res.json();
-
-    // ✅ Update petition directly with backend response
-    setPetitions((prev) =>
-      prev.map((p) => (p._id === id ? updatedPetition : p))
-    );
-
-    alert("Petition signed successfully!");
-  } catch (error) {
-    console.error("Error signing petition:", error);
-    alert("Error signing petition: " + error.message);
-  }
-};
-
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -395,6 +422,19 @@ const handleSign = async (id) => {
     );
   };
 
+  // Popup component
+  const Popup = ({ message, onClose }) =>
+    message ? (
+      <div className={styles.popupOverlay} onClick={onClose}>
+        <div className={styles.popup} onClick={e => e.stopPropagation()}>
+          <p>{message}</p>
+          <button className={styles.popupCloseBtn} onClick={onClose}>
+            Close
+          </button>
+        </div>
+      </div>
+    ) : null;
+
   return (
     <>
       <div className={styles.container}>
@@ -459,7 +499,7 @@ const handleSign = async (id) => {
                   }`}
                   onClick={() => handleTabChange("mine")}
                 >
-                  My Petitions
+                  My Petitions ({myPetitionsCount})
                 </button>
                 <button
                   className={`${styles.tabBtn} ${
@@ -467,13 +507,12 @@ const handleSign = async (id) => {
                   }`}
                   onClick={() => handleTabChange("signed")}
                 >
-                  Signed By Me
+                  Signed By Me ({signedPetitionsCount})
                 </button>
               </>
             )}
           </div>
 
-          {/* Category filter - now available on ALL tabs */}
           <div className={styles.filter}>
             <FaFilter className={styles.filterIcon} />
             <select
@@ -692,6 +731,7 @@ const handleSign = async (id) => {
           </div>
         )}
       </div>
+      <Popup message={popup} onClose={() => setPopup("")} />
       <Footer />
     </>
   );
