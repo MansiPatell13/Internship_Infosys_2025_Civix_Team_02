@@ -1,0 +1,275 @@
+/* Enhanced Navbar.module.css */
+
+/* General Navbar styling */
+.navbarContainer {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.navbarContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Logo styling */
+.navbarLogo {
+  font-weight: 800;
+  font-size: 2rem;
+  color: #2d5a3d;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.navbarLogo::before {
+  content: '🏛️';
+  font-size: 1.5rem;
+}
+
+.navbarLogo:hover {
+  color: #28a745;
+  transform: translateY(-1px);
+}
+
+/* Links and navigation */
+.navbarLinksWrapper {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.navbarLinksList {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 2rem;
+}
+
+.navbarLinkItem {
+  position: relative;
+}
+
+.navLink {
+  color: #5a6c57;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  position: relative;
+  display: block;
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  bottom: 0.25rem;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #28a745, #20c997);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+  border-radius: 1px;
+}
+
+.navLink:hover {
+  color: #2d5a3d;
+  transition: all 0.3s ease;
+  /* background-color: rgba(40, 167, 69, 0.1); */
+}
+
+.navLink:hover::after {
+  width: 70%;
+}
+
+.navLink.active {
+  color: #2d5a3d;
+  font-weight: 600;
+  background-color: rgba(40, 167, 69, 0.15);
+}
+
+.navLink.active::after {
+  width: 70%;
+}
+
+/* Buttons and user section */
+.navbarButtonsWrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userGreeting {
+  font-weight: 600;
+  color: #2d5a3d;
+  margin-right: 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* Enhanced Button styling */
+.button {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid transparent;
+  text-decoration: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-decoration: none;
+}
+
+.loginButton {
+  background-color: transparent;
+  color: #2d5a3d;
+  border-color: #2d5a3d;
+}
+
+.loginButton:hover {
+  background-color: #2d5a3d;
+  color: white;
+}
+
+.signupButton,
+.successButton {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
+.signupButton:hover,
+.successButton:hover {
+  background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+  color: white;
+}
+
+.dangerButton {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
+.dangerButton:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  color: white;
+}
+
+.roundedPill {
+  border-radius: 50px;
+}
+
+.px3 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.me3 {
+  margin-right: 1rem;
+}
+
+.fwBold {
+  font-weight: 700;
+}
+
+.shadow {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive styles for mobile */
+@media (max-width: 992px) {
+  .navbarContent {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .navbarLinksWrapper {
+    width: 100%;
+    margin: 0;
+  }
+
+  .navbarLinksList {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .navbarButtonsWrapper {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbarContainer {
+    padding: 1rem 0;
+  }
+
+  .navbarContent {
+    padding: 0 15px;
+  }
+
+  .navbarLogo {
+    font-size: 1.75rem;
+  }
+
+  .navbarLinksList {
+    gap: 0.5rem;
+  }
+
+  .navLink {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .button {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .userGreeting {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbarLinksList {
+    flex-direction: column;
+    width: 100%;
+    text-align: center;
+  }
+
+  .navbarButtonsWrapper {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+
+  .button {
+    width: 100%;
+    justify-content: center;
+  }
+}
