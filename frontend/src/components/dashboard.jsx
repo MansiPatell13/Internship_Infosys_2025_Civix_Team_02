@@ -421,12 +421,12 @@ function Dashboard() {
               {/* Updated Stats Grid with real data and debug info */}
               <div className="stats-grid">
                 <div className="stat-card">
-                  <h3>My Petitions</h3>
+                  <h3>Total Petitions</h3>
                   <h2>{petitions.length}</h2>
                   <p>petitions created</p>
                 </div>
                 <div className="stat-card">
-                  <h3>Successful Petitions</h3>
+                  <h3>My Petitions</h3>
                   <h2>{userStats.successfulPetitions}</h2>
                   <p>or under review</p>
                 </div>

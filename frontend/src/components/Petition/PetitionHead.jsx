@@ -15,7 +15,6 @@ const PetitionHead = () => {
   const [petitionsPerPage] = useState(8);
   const [popup, setPopup] = useState("");
 
-  // Function to decode JWT token
   const decodeToken = (token) => {
     try {
       const base64Url = token.split('.')[1];
