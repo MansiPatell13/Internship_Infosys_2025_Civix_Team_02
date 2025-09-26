@@ -232,7 +232,7 @@ function Dashboard() {
           return matches;
         });
         
-        // console.log("User polls count:", userPolls.length); // Debug log
+        console.log("User polls count:", userPolls.length); // Debug log
         
         setUserStats(prev => ({
           ...prev,
