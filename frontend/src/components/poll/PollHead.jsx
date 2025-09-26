@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./PollHead.module.css";
-
+// changed
 const Footer = () => {
   return (
     <footer className={styles.footer}>
