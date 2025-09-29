@@ -7,35 +7,33 @@ import PollDetail from './PollDetail';
 import styles from './PollList.module.css';
 
 const PollList = () => {
-  const { user } = useAuth();
+  const { user } = useAuth(); // user contains info like role, id, etc.
   const [polls, setPolls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedPoll, setSelectedPoll] = useState(null);
-  
-  // Filter and pagination states
+
   const [filters, setFilters] = useState({
     location: '',
     createdBy: '',
     page: 1,
     limit: 12
   });
-  
+
   const [totalCount, setTotalCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Fetch polls
   const fetchPolls = async () => {
     try {
       setLoading(true);
       setError('');
-      
+
       const params = { ...filters };
       if (searchTerm.trim()) {
         params.location = searchTerm.trim();
       }
-      
+
       const response = await pollAPI.getList(params);
       setPolls(response.polls || []);
       setTotalCount(response.totalCount || 0);
@@ -47,73 +45,63 @@ const PollList = () => {
     }
   };
 
-  // Initial fetch and refetch on filter changes
   useEffect(() => {
     fetchPolls();
   }, [filters]);
 
-  // Handle search
   const handleSearch = (e) => {
     e.preventDefault();
     setFilters(prev => ({ ...prev, page: 1 }));
     fetchPolls();
   };
 
-  // Handle filter changes
   const handleFilterChange = (filterName, value) => {
     setFilters(prev => ({
       ...prev,
       [filterName]: value,
-      page: 1 // Reset to first page when filters change
+      page: 1
     }));
   };
 
-  // Handle pagination
   const handlePageChange = (newPage) => {
     setFilters(prev => ({ ...prev, page: newPage }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Calculate pagination
   const totalPages = Math.ceil(totalCount / filters.limit);
   const startItem = (filters.page - 1) * filters.limit + 1;
   const endItem = Math.min(filters.page * filters.limit, totalCount);
 
-  // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffTime = date - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) {
-      return 'Closed';
-    } else if (diffDays === 0) {
-      return 'Closes today';
-    } else if (diffDays === 1) {
-      return 'Closes tomorrow';
-    } else {
-      return `${diffDays} days left`;
-    }
+
+    if (diffDays < 0) return 'Closed';
+    if (diffDays === 0) return 'Closes today';
+    if (diffDays === 1) return 'Closes tomorrow';
+    return `${diffDays} days left`;
   };
 
-  // Check if poll is closed
   const isPollClosed = (closesOn) => {
     return new Date(closesOn) < new Date();
   };
 
   if (selectedPoll) {
     return (
-      <PollDetail 
-        pollId={selectedPoll} 
+      <PollDetail
+        pollId={selectedPoll}
         onBack={() => setSelectedPoll(null)}
         onVoteSuccess={fetchPolls}
+        canVote={user?.role === 'user'} // Only users can vote
       />
     );
   }
 
   return (
     <div className={styles.container}>
+      {/* Header */}
       <div className={styles.header}>
         <div className={styles.titleSection}>
           <h1 className={styles.title}>
@@ -121,10 +109,12 @@ const PollList = () => {
             Community Polls
           </h1>
           <p className={styles.subtitle}>
-            Participate in community decisions and see what others think
+            {user?.role === 'official'
+              ? 'As an official, you can view all community polls.'
+              : 'Participate in community decisions and see what others think.'}
           </p>
         </div>
-        
+
         <div className={styles.stats}>
           <div className={styles.statItem}>
             <span className={styles.statNumber}>{totalCount}</span>
@@ -133,7 +123,7 @@ const PollList = () => {
         </div>
       </div>
 
-      {/* Search and Filters */}
+      {/* Search & Filters */}
       <div className={styles.controlsSection}>
         <form onSubmit={handleSearch} className={styles.searchForm}>
           <div className={styles.searchInputGroup}>
@@ -152,13 +142,10 @@ const PollList = () => {
         </form>
 
         <div className={styles.filterSection}>
-          <button 
-            className={styles.filterToggle}
-            onClick={() => setShowFilters(!showFilters)}
-          >
+          <button className={styles.filterToggle} onClick={() => setShowFilters(!showFilters)}>
             <FaFilter /> Filters
           </button>
-          
+
           {showFilters && (
             <div className={styles.filterPanel}>
               <div className={styles.filterGroup}>
@@ -168,11 +155,11 @@ const PollList = () => {
                   onChange={(e) => handleFilterChange('createdBy', e.target.value)}
                   className={styles.filterSelect}
                 >
-                  <option value="">All Users</option>
+                  <option value="">All</option>
                   <option value={user?.id || user?._id}>My Polls Only</option>
                 </select>
               </div>
-              
+
               <div className={styles.filterGroup}>
                 <label>Results per page:</label>
                 <select
@@ -190,73 +177,34 @@ const PollList = () => {
         </div>
       </div>
 
-      {/* Results Info */}
-      {!loading && (
-        <div className={styles.resultsInfo}>
-          <p>
-            Showing {polls.length > 0 ? startItem : 0}-{endItem} of {totalCount} polls
-            {searchTerm && ` for "${searchTerm}"`}
-          </p>
-        </div>
-      )}
-
-      {/* Error Message */}
-      {error && (
-        <div className={styles.errorMessage}>
-          <p>{error}</p>
-          <button onClick={fetchPolls} className={styles.retryButton}>
-            Try Again
-          </button>
-        </div>
-      )}
-
-      {/* Loading State */}
-      {loading && (
-        <div className={styles.loading}>
-          <div className={styles.loadingSpinner}></div>
-          <p>Loading polls...</p>
-        </div>
-      )}
-
-      {/* Polls Grid */}
+      {/* Poll Cards */}
       {!loading && polls.length > 0 && (
         <div className={styles.pollsGrid}>
           {polls.map((poll) => (
-            <div 
-              key={poll._id} 
+            <div
+              key={poll._id}
               className={`${styles.pollCard} ${isPollClosed(poll.closesOn) ? styles.closedPoll : ''}`}
               onClick={() => setSelectedPoll(poll._id)}
             >
               <div className={styles.pollHeader}>
                 <h3 className={styles.pollTitle}>{poll.title}</h3>
-                <div className={styles.pollStatus}>
-                  <span className={`${styles.statusBadge} ${
-                    isPollClosed(poll.closesOn) ? styles.closedBadge : styles.activeBadge
-                  }`}>
-                    {isPollClosed(poll.closesOn) ? 'Closed' : 'Active'}
-                  </span>
-                </div>
+                <span className={`${styles.statusBadge} ${isPollClosed(poll.closesOn) ? styles.closedBadge : styles.activeBadge}`}>
+                  {isPollClosed(poll.closesOn) ? 'Closed' : 'Active'}
+                </span>
               </div>
 
               <p className={styles.pollDescription}>
-                {poll.description.length > 150 
-                  ? `${poll.description.substring(0, 150)}...` 
-                  : poll.description
-                }
+                {poll.description.length > 150 ? `${poll.description.substring(0, 150)}...` : poll.description}
               </p>
 
               <div className={styles.pollOptions}>
                 <p className={styles.optionsLabel}>Options:</p>
                 <div className={styles.optionsList}>
-                  {poll.options.slice(0, 3).map((option, index) => (
-                    <span key={index} className={styles.optionTag}>
-                      {option.text}
-                    </span>
+                  {poll.options.slice(0, 3).map((opt, idx) => (
+                    <span key={idx} className={styles.optionTag}>{opt.text}</span>
                   ))}
                   {poll.options.length > 3 && (
-                    <span className={styles.moreOptions}>
-                      +{poll.options.length - 3} more
-                    </span>
+                    <span className={styles.moreOptions}>+{poll.options.length - 3} more</span>
                   )}
                 </div>
               </div>
@@ -264,16 +212,14 @@ const PollList = () => {
               <div className={styles.pollMeta}>
                 <div className={styles.metaItem}>
                   <FaUsers className={styles.metaIcon} />
-                  <span>{poll.options.reduce((total, opt) => total + (opt.votes || 0), 0)} votes</span>
+                  <span>{poll.options.reduce((acc, opt) => acc + (opt.votes || 0), 0)} votes</span>
                 </div>
-                
                 {poll.targetLocation && (
                   <div className={styles.metaItem}>
                     <FaMapMarkerAlt className={styles.metaIcon} />
                     <span>{poll.targetLocation}</span>
                   </div>
                 )}
-                
                 <div className={styles.metaItem}>
                   <FaClock className={styles.metaIcon} />
                   <span className={isPollClosed(poll.closesOn) ? styles.closedText : styles.activeText}>
@@ -283,12 +229,8 @@ const PollList = () => {
               </div>
 
               <div className={styles.pollFooter}>
-                <div className={styles.creatorInfo}>
-                  <span>By: {poll.createdBy?.name || 'Unknown'}</span>
-                </div>
-                <div className={styles.pollDate}>
-                  <span>{new Date(poll.createdAt).toLocaleDateString()}</span>
-                </div>
+                <span>By: {poll.createdBy?.name || 'Unknown'}</span>
+                <span>{new Date(poll.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
           ))}
@@ -301,10 +243,9 @@ const PollList = () => {
           <MdOutlinePoll className={styles.emptyIcon} />
           <h3>No polls found</h3>
           <p>
-            {searchTerm 
+            {searchTerm
               ? `No polls found matching "${searchTerm}". Try a different search term.`
-              : 'No polls are available at the moment. Be the first to create one!'
-            }
+              : 'No polls are available at the moment. Be the first to create one!'}
           </p>
         </div>
       )}
@@ -319,34 +260,24 @@ const PollList = () => {
           >
             Previous
           </button>
-          
-          <div className={styles.pageNumbers}>
-            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-              let pageNum;
-              if (totalPages <= 5) {
-                pageNum = i + 1;
-              } else if (filters.page <= 3) {
-                pageNum = i + 1;
-              } else if (filters.page >= totalPages - 2) {
-                pageNum = totalPages - 4 + i;
-              } else {
-                pageNum = filters.page - 2 + i;
-              }
-              
-              return (
-                <button
-                  key={pageNum}
-                  onClick={() => handlePageChange(pageNum)}
-                  className={`${styles.pageButton} ${
-                    pageNum === filters.page ? styles.activePage : ''
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
-          </div>
-          
+
+          {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+            let pageNum = filters.page <= 3
+              ? i + 1
+              : filters.page >= totalPages - 2
+              ? totalPages - 4 + i
+              : filters.page - 2 + i;
+            return (
+              <button
+                key={pageNum}
+                onClick={() => handlePageChange(pageNum)}
+                className={`${styles.pageButton} ${filters.page === pageNum ? styles.activePage : ''}`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
           <button
             onClick={() => handlePageChange(filters.page + 1)}
             disabled={filters.page === totalPages}

@@ -7,6 +7,7 @@
   height: 90vh;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin: 3rem auto 0 auto;
 }
 
 .highlight-green {
@@ -64,6 +65,7 @@
   font-weight: 1000;
   margin: 0.1rem;
   margin-top: 1rem;
+  text-align: center;
 }
 
 .google-btn {
@@ -102,6 +104,7 @@
   font-size: 20px;
   margin: auto;
   margin-top: 0%;
+  text-align: center;
 }
 
 .signup-image {
@@ -168,7 +171,8 @@
 }
 
 .submit-btn {
-  width: 55%;
+  width: 20rem;
+  border-radius: 10px;
   height: 2.2rem;
   background-color: green;
   color: white;

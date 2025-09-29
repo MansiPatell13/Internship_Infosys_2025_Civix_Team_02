@@ -251,6 +251,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   height: fit-content;
+  height: 420px;
+  display: flex;
+  flex-direction: column;
 }
 
 .pollCard:hover {
@@ -262,6 +265,7 @@
 .closedPoll {
   opacity: 0.7;
   border-color: #e5e7eb;
+  
 }
 
 .closedPoll:hover {
