@@ -3206,12 +3206,7 @@ const PollVotingInterface = () => {
               </p>
             </div>
             <div className={styles.headerRight}>
-              <button 
-                className={styles.createPollButton}
-                onClick={handleCreatePoll}
-              >
-                + Create Poll
-              </button>
+             
             </div>
           </div>
         </div>
