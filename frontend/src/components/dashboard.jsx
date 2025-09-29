@@ -282,7 +282,7 @@ function Dashboard() {
     if (activeTab === "petitions") {
       navigate('/petition-head');
     } else {
-      navigate('/poll-head');
+      navigate('/polls');
     }
   };
 

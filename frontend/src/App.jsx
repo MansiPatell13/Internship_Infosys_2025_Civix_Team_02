@@ -15,9 +15,12 @@ import PetitionCategory from "./components/Petition/PettionCategory";
 import PetitionPage from "./components/Petition/PetitionPage";
 import PollCreation from './components/NavbarPoll/PollCreation.jsx';
 import PollHead from './components/poll/PollHead.jsx'
+import PollPage from './pages/PollPage.jsx';
+import { AuthProvider } from '../src/components/Auth/AuthContext.jsx';
 function App() {
   
   return (
+    <AuthProvider>
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/home" />} /> 
@@ -35,8 +38,10 @@ function App() {
         <Route path='/pollsfilter' element={<Polls/>}/>
         <Route path='/poll-creation' element={<PollCreation/>}/>
         <Route path='poll-head' element={<PollHead/>}/>
+        <Route path="/polls" element={<PollPage />} />
       </Routes>
     </Router>
+    </AuthProvider>
   );
 }
 

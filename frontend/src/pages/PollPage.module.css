@@ -1,0 +1,142 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f8fafc 100%);
+}
+
+.notAuthenticated {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+}
+
+.notAuthenticated h2 {
+  color: #374151;
+  margin-bottom: 1rem;
+}
+
+.createPollSection {
+  padding: 2rem 0;
+}
+
+.createPollHeader {
+  padding: 0 2rem 1rem 2rem;
+}
+
+.backToPollsBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #374151;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.backToPollsBtn:hover {
+  background: #f8fafc;
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+.pollsHeader {
+  padding: 2rem;
+  background: white;
+  margin: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f1f5f9;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.welcomeSection h1 {
+  font-size: 2rem;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.welcomeSection p {
+  color: #64748b;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.createPollBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.3);
+}
+
+.createPollBtn:hover {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 10px -1px rgba(34, 197, 94, 0.4);
+}
+
+.roleInfo {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #fffbeb;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #92400e;
+}
+
+.roleInfo p {
+  margin: 0;
+  font-size: 0.925rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .pollsHeader,
+  .createPollHeader {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .headerContent {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+  
+  .welcomeSection h1 {
+    font-size: 1.75rem;
+  }
+  
+  .createPollBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}

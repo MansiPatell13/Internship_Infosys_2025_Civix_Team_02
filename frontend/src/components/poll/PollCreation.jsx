@@ -1,237 +1,294 @@
 import React, { useState } from 'react';
-import { FaPlus } from 'react-icons/fa';
-import { MdOutlinePoll } from "react-icons/md";
-import { useNavigate, useLocation } from "react-router-dom";
+import { FaPlus, FaTimes } from 'react-icons/fa';
+import { MdOutlinePoll } from 'react-icons/md';
+import { useAuth } from '../Auth/AuthContext';
+import { pollAPI } from '../../utils/api';
 import styles from './PollCreation.module.css';
-import Navbar from '../Landing/Navbar';
-import Footer from '../Landing/Footer';
 
-const BASE_URL =
-  import.meta.env?.VITE_BASE_URL || process.env.REACT_APP_BASE_URL || "http://localhost:4000";
+const PollCreation = ({ onSuccess, isInDashboard = false }) => {
+  const { user } = useAuth();
+  const today = new Date().toISOString().split("T")[0];
+  
+  const [poll, setPoll] = useState({
+    title: '',
+    description: '',
+    options: ['', ''],
+    closesOn: today,
+    targetLocation: '',
+  });
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-const PollCreation = ({ isInDashboard = false, onSuccess }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const addOption = () => {
+    if (poll.options.length < 10) {
+      setPoll({ ...poll, options: [...poll.options, ''] });
+    }
+  };
 
-  const showBackButton = location.state?.from === 'petition-head' || !isInDashboard;
-  const today = new Date().toISOString().split("T")[0];
+  const updateOption = (index, value) => {
+    const newOptions = [...poll.options];
+    newOptions[index] = value;
+    setPoll({ ...poll, options: newOptions });
+  };
 
-  const [poll, setPoll] = useState({
-    title: '',
-    description: '',
-    options: [],
-    closesOn: today,
-    targetLocation: '',
-  });
+  const removeOption = (index) => {
+    if (poll.options.length > 2) {
+      const newOptions = poll.options.filter((_, i) => i !== index);
+      setPoll({ ...poll, options: newOptions });
+    }
+  };
 
-  const addOption = () => {
-    if (poll.options.length < 10) {
-      setPoll({ ...poll, options: [...poll.options, ''] });
-    }
-  };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setPoll({ ...poll, [name]: value });
+  };
 
-  const updateOption = (index, value) => {
-    const newOptions = [...poll.options];
-    newOptions[index] = value;
-    setPoll({ ...poll, options: newOptions });
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-  const removeOption = (index) => {
-    const newOptions = poll.options.filter((_, i) => i !== index);
-    setPoll({ ...poll, options: newOptions });
-  };
+    try {
+      if (!poll.title.trim()) {
+        throw new Error('Poll title is required');
+      }
+      
+      if (!poll.description.trim()) {
+        throw new Error('Poll description is required');
+      }
 
-  const handlePollChange = (e) => {
-    const { name, value } = e.target;
-    setPoll({ ...poll, [name]: value });
-  };
+      const validOptions = poll.options.filter(opt => opt.trim() !== '');
+      if (validOptions.length < 2) {
+        throw new Error('At least 2 options are required');
+      }
 
-  const handlePollCreate = async (e) => {
-    e.preventDefault();
+      if (!poll.closesOn) {
+        throw new Error('Closing date is required');
+      }
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You must be logged in to create a poll.");
-        return;
-      }
+      // Check if closing date is in the future
+      const closingDate = new Date(poll.closesOn);
+      const now = new Date();
+      if (closingDate <= now) {
+        throw new Error('Closing date must be in the future');
+      }
 
-      // Map options array to objects: { text }
-      const validOptions = poll.options.filter(opt => opt.trim() !== "").map(opt => ({ text: opt }));
+      // Prepare poll data matching backend expectations
+      const pollData = {
+        title: poll.title.trim(),
+        description: poll.description.trim(),
+        options: validOptions.map(opt => ({ text: opt.trim() })),
+        closesOn: poll.closesOn,
+        targetLocation: poll.targetLocation.trim(),
+      };
 
-      if (!poll.title || validOptions.length < 2 || !poll.description.trim()) {
-        alert("Please provide a title, description, and at least 2 valid options.");
-        return;
-      }
+      await pollAPI.create(pollData);
 
-      const pollData = {
-        title: poll.title,
-        description: poll.description,
-        options: validOptions,
-        closesOn: poll.closesOn,
-        targetLocation: poll.targetLocation,
-      };
+      // Reset form
+      setPoll({
+        title: '',
+        description: '',
+        options: ['', ''],
+        closesOn: today,
+        targetLocation: '',
+      });
 
-      const res = await fetch(`${BASE_URL}/api/polls`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(pollData),
-      });
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        alert('Poll created successfully!');
+      }
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to create poll");
-      }
+    } catch (err) {
+      setError(err.message || 'Failed to create poll');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      const data = await res.json();
-      alert("Poll created successfully!");
+  if (user?.role !== 'citizen') {
+    return (
+      <div className={styles.errorContainer}>
+        <div className={styles.errorContent}>
+          <MdOutlinePoll className={styles.errorIcon} />
+          <h2>Access Restricted</h2>
+          <p className={styles.errorMessage}>
+            Only citizens can create polls. You are registered as: <strong>{user?.role}</strong>
+          </p>
+          <p className={styles.errorHint}>
+            Citizens can create and vote on polls, while officials can view and monitor all community polls.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-      setPoll({
-        title: '',
-        description: '',
-        options: [],
-        closesOn: today,
-        targetLocation: '',
-      });
+  const containerClass = isInDashboard ? styles.dashboardContainer : styles.container;
+  const cardClass = isInDashboard ? styles.dashboardCard : styles.card;
 
-      if (isInDashboard && onSuccess) {
-        onSuccess();
-      } else {
-        navigate('/polls');
-      }
-    } catch (error) {
-      alert("Error creating poll: " + error.message);
-    }
-  };
+  return (
+    <div className={containerClass}>
+      <div className={cardClass}>
+        <div className={styles.header}>
+          <div className={styles.headerLeft}>
+            <h1 className={styles.title}>Create Poll</h1>
+            <div className={styles.subtitle}>
+              <MdOutlinePoll className={styles.icon} />
+              <span>Engage your community</span>
+            </div>
+          </div>
+          <div className={styles.logo}>
+            <span className={styles.logoText}>Civix</span>
+          </div>
+        </div>
 
-  const containerClass = isInDashboard ? styles.dashboardContainer : styles.container;
-  const cardClass = isInDashboard ? styles.dashboardCard : styles.card;
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.field}>
+            <label className={styles.label}>Poll Title *</label>
+            <input
+              type="text"
+              name="title"
+              className={styles.input}
+              placeholder="What question would you like to ask the community?"
+              value={poll.title}
+              onChange={handleChange}
+              required
+              maxLength={200}
+            />
+            <p className={styles.hint}>
+              Keep it clear and concise (max 200 characters) - {poll.title.length}/200
+            </p>
+          </div>
 
-  return (
-    <div className={containerClass}>
-      {!isInDashboard && <Navbar />}
-      {showBackButton && !isInDashboard && (
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
-          ← Back
-        </button>
-      )}
+          <div className={styles.field}>
+            <label className={styles.label}>Description *</label>
+            <textarea
+              name="description"
+              className={styles.textarea}
+              placeholder="Provide context and details about your poll..."
+              rows="4"
+              value={poll.description}
+              onChange={handleChange}
+              required
+              maxLength={1000}
+            />
+            <p className={styles.hint}>
+              Help voters understand the context (max 1000 characters) - {poll.description.length}/1000
+            </p>
+          </div>
 
-      <div className={cardClass}>
-        <div className={styles.header}>
-          <div className={styles.headerLeft}>
-            <h1 className={styles.title}>Poll Creation</h1>
-            <div className={styles.subtitle}>
-              <MdOutlinePoll className={styles.icon} />
-              <span>Create a new poll</span>
-            </div>
-          </div>
-          <div className={styles.logo}>
-            <span className={styles.logoText}>Civix</span>
-          </div>
-        </div>
+          <div className={styles.field}>
+            <label className={styles.label}>Poll Options *</label>
+            <div className={styles.optionsHeader}>
+              <button 
+                type="button" 
+                className={styles.addButton} 
+                onClick={addOption}
+                disabled={poll.options.length >= 10}
+              >
+                <FaPlus className={styles.addIcon} />
+                Add Option
+              </button>
+              <p className={styles.hint}>
+                Add 2-10 options. Currently: {poll.options.length}/10
+              </p>
+            </div>
 
-        <form onSubmit={handlePollCreate} className={styles.form}>
-          <div className={styles.field}>
-            <label className={styles.label}>Poll Title</label>
-            <input
-              type="text"
-              name="title"
-              className={styles.input}
-              placeholder="Enter your question for the community"
-              value={poll.title}
-              onChange={handlePollChange}
-              required
-            />
-            <p className={styles.hint}>Be clear and specific with your question</p>
-          </div>
+            <div className={styles.optionsContainer}>
+              {poll.options.map((option, index) => (
+                <div key={index} className={styles.optionRow}>
+                  <span className={styles.optionNumber}>{index + 1}</span>
+                  <input
+                    type="text"
+                    className={styles.optionInput}
+                    placeholder={`Option ${index + 1}`}
+                    value={option}
+                    onChange={(e) => updateOption(index, e.target.value)}
+                    maxLength={100}
+                  />
+                  {poll.options.length > 2 && (
+                    <button
+                      type="button"
+                      className={styles.removeButton}
+                      onClick={() => removeOption(index)}
+                      title="Remove option"
+                    >
+                      <FaTimes />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
 
-          <div className={styles.field}>
-            <label className={styles.label}>Description</label>
-            <textarea
-              name="description"
-              className={styles.textarea}
-              placeholder="Provide more context about the poll..."
-              rows="4"
-              value={poll.description}
-              onChange={handlePollChange}
-              required
-            />
-          </div>
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label className={styles.label}>Closes On *</label>
+              <input
+                type="date"
+                name="closesOn"
+                className={styles.dateInput}
+                value={poll.closesOn}
+                onChange={handleChange}
+                min={today}
+                required
+              />
+              <p className={styles.hint}>Poll will close at midnight on selected date</p>
+            </div>
 
-          <div className={styles.field}>
-            <label className={styles.label}>Poll Options</label>
-            <button type="button" className={styles.addButton} onClick={addOption}>
-              <FaPlus className={styles.addIcon} />
-              Add Option
-            </button>
-            <p className={styles.hint}>Add at least 2 options, up to a maximum of 10</p>
+            <div className={styles.field}>
+              <label className={styles.label}>Target Location</label>
+              <input
+                type="text"
+                name="targetLocation"
+                className={styles.searchInput}
+                placeholder="e.g., New York, Mumbai, Delhi, etc."
+                value={poll.targetLocation}
+                onChange={handleChange}
+                maxLength={100}
+              />
+              <p className={styles.hint}>Leave blank for general polls</p>
+            </div>
+          </div>
 
-            {poll.options.map((option, index) => (
-              <div key={index} className={styles.optionRow}>
-                <input
-                  type="text"
-                  className={styles.optionInput}
-                  placeholder={`Option ${index + 1}`}
-                  value={option}
-                  onChange={(e) => updateOption(index, e.target.value)}
-                />
-                <button
-                  type="button"
-                  className={styles.removeButton}
-                  onClick={() => removeOption(index)}
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
+          {error && (
+            <div className={styles.errorAlert}>
+              <p>{error}</p>
+            </div>
+          )}
 
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label className={styles.label}>Closes On</label>
-              <div className={styles.dateInputWrapper}>
-                <input
-                  type="date"
-                  name="closesOn"
-                  className={styles.dateInput}
-                  value={poll.closesOn}
-                  onChange={handlePollChange}
-                  min={today}
-                />
-              </div>
-              <p className={styles.hint}>Set poll closing date (up to 30 days)</p>
-            </div>
+          <div className={styles.actions}>
+            <button 
+              type="submit" 
+              className={styles.createButton}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <div className={styles.buttonSpinner}></div>
+                  Creating Poll...
+                </>
+              ) : (
+                'Create Poll'
+              )}
+            </button>
+          </div>
 
-            <div className={styles.field}>
-              <label className={styles.label}>Target Location</label>
-              <div className={styles.searchInputWrapper}>
-                <input
-                  type="text"
-                  name="targetLocation"
-                  className={styles.searchInput}
-                  placeholder="Search location"
-                  value={poll.targetLocation}
-                  onChange={handlePollChange}
-                />
-              </div>
-              <p className={styles.hint}>The area this poll is relevant to.</p>
-            </div>
-          </div>
-
-          <div className={styles.actions}>
-            <button type="submit" className={styles.createButton}>
-              Create Poll
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {!isInDashboard && <Footer />}
-    </div>
-  );
+          <div className={styles.formInfo}>
+            <h4>Poll Creation Guidelines:</h4>
+            <ul>
+              <li>Write a clear, unbiased question as your poll title</li>
+              <li>Provide sufficient context in the description</li>
+              <li>Create balanced and fair options for voters</li>
+              <li>Set a reasonable closing date (recommended: 7-30 days)</li>
+              <li>Specify location if the poll is region-specific</li>
+            </ul>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default PollCreation;
