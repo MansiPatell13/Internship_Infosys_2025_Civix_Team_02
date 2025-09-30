@@ -15,7 +15,9 @@ import dashboardRoutes from "./src/routes/dashboard.routes.js";
 import forgotPasswordRoutes from "./src/routes/forgotPassword.routes.js";
 import petitionRoutes from "./src/routes/petition.routes.js";
 import pollRoutes from "./src/routes/poll.routes.js";
-import reportRoutes from "./src/routes/report.routes.js"; //  NEW
+import reportRoutes from "./src/routes/report.routes.js";
+import commentRoutes from "./src/routes/comment.routes.js";
+import officialRoutes from "./src/routes/official.routes.js";
 
 const app = express();
 
@@ -37,7 +39,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/auth", forgotPasswordRoutes);
 app.use("/api/polls", pollRoutes);
-app.use("/api/reports", reportRoutes); //  NEW Reports Dashboard routes
+app.use("/api/reports", reportRoutes);
+app.use("/api/comments", commentRoutes);
+app.use("/api/official", officialRoutes);
 
 // Health check route
 app.get("/", (req, res) => res.json({ ok: true, service: "Civix Backend" }));
