@@ -2,10 +2,14 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { isOfficial } from "../middleware/role.js";
+import { preventCache } from "../middleware/cacheControl.js";
 import Petition from "../models/Petition.js";
 import Poll from "../models/poll.js";
 
 const router = Router();
+
+// Apply cache control to all dashboard routes
+router.use(preventCache);
 
 /**
  *  Dashboard Stats

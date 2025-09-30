@@ -3,8 +3,12 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { body, validationResult } from "express-validator";
 import User from "../models/User.js";
+import { preventCache } from "../middleware/cacheControl.js";
 
 const router = Router();
+
+// Apply cache control to all auth routes
+router.use(preventCache);
 
 // Helpers
 const signToken = (user) => {
@@ -89,5 +93,50 @@ router.post(
     }
   }
 );
+
+// GET /api/auth/verify - Verify token and return user info
+router.get("/verify", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ 
+        isValid: false, 
+        message: "No token provided" 
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Get fresh user data
+    const user = await User.findById(decoded.sub).select("-password");
+    if (!user) {
+      return res.status(401).json({ 
+        isValid: false, 
+        message: "User not found" 
+      });
+    }
+
+    // Return fresh token and user data
+    const newToken = signToken(user);
+    res.json({
+      isValid: true,
+      message: "Token is valid",
+      token: newToken, // Return fresh token
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        location: user.location
+      }
+    });
+  } catch (err) {
+    res.status(401).json({ 
+      isValid: false, 
+      message: "Invalid or expired token" 
+    });
+  }
+});
 
 export default router;

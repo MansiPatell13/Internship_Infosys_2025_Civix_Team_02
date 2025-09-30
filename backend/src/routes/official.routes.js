@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { isOfficial } from '../middleware/role.js';
+import { preventCache } from '../middleware/cacheControl.js';
 import { 
   getLocationPetitions,
   updatePetitionStatus,
@@ -13,6 +14,9 @@ import {
 } from '../controllers/poll.controller.js';
 
 const router = Router();
+
+// Apply cache control to all official routes
+router.use(preventCache);
 
 // Apply auth and official middleware to all routes
 router.use(requireAuth, isOfficial);
