@@ -18,6 +18,7 @@ import pollRoutes from "./src/routes/poll.routes.js";
 import reportRoutes from "./src/routes/report.routes.js";
 import commentRoutes from "./src/routes/comment.routes.js";
 import officialRoutes from "./src/routes/official.routes.js";
+import settingsRoutes from "./src/routes/settings.routes.js";
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use("/api/polls", pollRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/official", officialRoutes);
+app.use("/api/user/settings", settingsRoutes);
 
 // Health check route
 app.get("/", (req, res) => res.json({ ok: true, service: "Civix Backend" }));
