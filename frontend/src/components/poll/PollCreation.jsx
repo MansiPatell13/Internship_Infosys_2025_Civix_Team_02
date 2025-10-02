@@ -8,15 +8,15 @@ import styles from './PollCreation.module.css';
 const PollCreation = ({ onSuccess, isInDashboard = false }) => {
   const { user } = useAuth();
   const today = new Date().toISOString().split("T")[0];
-  
+
   const [poll, setPoll] = useState({
     title: '',
     description: '',
     options: ['', ''],
     closesOn: today,
-    targetLocation: '',
+    target_location: '',  // ✅ changed from targetLocation
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -50,37 +50,25 @@ const PollCreation = ({ onSuccess, isInDashboard = false }) => {
     setLoading(true);
 
     try {
-      if (!poll.title.trim()) {
-        throw new Error('Poll title is required');
-      }
-      
-      if (!poll.description.trim()) {
-        throw new Error('Poll description is required');
-      }
+      if (!poll.title.trim()) throw new Error('Poll title is required');
+      if (!poll.description.trim()) throw new Error('Poll description is required');
 
       const validOptions = poll.options.filter(opt => opt.trim() !== '');
-      if (validOptions.length < 2) {
-        throw new Error('At least 2 options are required');
-      }
+      if (validOptions.length < 2) throw new Error('At least 2 options are required');
 
-      if (!poll.closesOn) {
-        throw new Error('Closing date is required');
-      }
+      if (!poll.closesOn) throw new Error('Closing date is required');
 
-      // Check if closing date is in the future
       const closingDate = new Date(poll.closesOn);
       const now = new Date();
-      if (closingDate <= now) {
-        throw new Error('Closing date must be in the future');
-      }
+      if (closingDate <= now) throw new Error('Closing date must be in the future');
 
-      // Prepare poll data matching backend expectations
+      // ✅ Ensure correct field names expected by backend
       const pollData = {
         title: poll.title.trim(),
         description: poll.description.trim(),
         options: validOptions.map(opt => ({ text: opt.trim() })),
         closesOn: poll.closesOn,
-        targetLocation: poll.targetLocation.trim(),
+        target_location: poll.target_location.trim(), // ✅ fixed key here
       };
 
       await pollAPI.create(pollData);
@@ -91,7 +79,7 @@ const PollCreation = ({ onSuccess, isInDashboard = false }) => {
         description: '',
         options: ['', ''],
         closesOn: today,
-        targetLocation: '',
+        target_location: '', // ✅ match reset field
       });
 
       if (onSuccess) {
@@ -99,7 +87,6 @@ const PollCreation = ({ onSuccess, isInDashboard = false }) => {
       } else {
         alert('Poll created successfully!');
       }
-
     } catch (err) {
       setError(err.message || 'Failed to create poll');
     } finally {
@@ -181,9 +168,9 @@ const PollCreation = ({ onSuccess, isInDashboard = false }) => {
           <div className={styles.field}>
             <label className={styles.label}>Poll Options *</label>
             <div className={styles.optionsHeader}>
-              <button 
-                type="button" 
-                className={styles.addButton} 
+              <button
+                type="button"
+                className={styles.addButton}
                 onClick={addOption}
                 disabled={poll.options.length >= 10}
               >
@@ -241,10 +228,10 @@ const PollCreation = ({ onSuccess, isInDashboard = false }) => {
               <label className={styles.label}>Target Location</label>
               <input
                 type="text"
-                name="targetLocation"
+                name="target_location" // ✅ input field name matches backend
                 className={styles.searchInput}
                 placeholder="e.g., New York, Mumbai, Delhi, etc."
-                value={poll.targetLocation}
+                value={poll.target_location}
                 onChange={handleChange}
                 maxLength={100}
               />
@@ -259,8 +246,8 @@ const PollCreation = ({ onSuccess, isInDashboard = false }) => {
           )}
 
           <div className={styles.actions}>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className={styles.createButton}
               disabled={loading}
             >
@@ -273,17 +260,6 @@ const PollCreation = ({ onSuccess, isInDashboard = false }) => {
                 'Create Poll'
               )}
             </button>
-          </div>
-
-          <div className={styles.formInfo}>
-            <h4>Poll Creation Guidelines:</h4>
-            <ul>
-              <li>Write a clear, unbiased question as your poll title</li>
-              <li>Provide sufficient context in the description</li>
-              <li>Create balanced and fair options for voters</li>
-              <li>Set a reasonable closing date (recommended: 7-30 days)</li>
-              <li>Specify location if the poll is region-specific</li>
-            </ul>
           </div>
         </form>
       </div>
