@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import './dashboard.css';
 import { FaUserCircle, FaHome } from "react-icons/fa";
@@ -12,6 +13,7 @@ import Navbar from '../components/Landing/Navbar';
 import Footer from '../components/Landing/Footer';
 import PetitionPage from '../components/Petition/PetitionPage';
 import PollCreation from '../components/poll/PollCreation';
+import ReportDashboard from "../components/Reports/ReportsDashboard";
 
 function Dashboard() {
   const [user, setUser] = useState({ name: "", email: "", location: "" });
@@ -24,12 +26,74 @@ function Dashboard() {
   const [activeView, setActiveView] = useState("dashboard");
   const [activeTab, setActiveTab] = useState("petitions");
   const [userStats, setUserStats] = useState({
+    totalActivePetitions: 0,
     myPetitions: 0,
-    successfulPetitions: 0,
-    pollsCreated: 0
+    totalActivePolls: 0
   });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Helper function to get user info
+  const getUserInfo = () => {
+    let userId = localStorage.getItem("userId") || "";
+    let userObject = {};
+    
+    try {
+      userObject = JSON.parse(localStorage.getItem("user") || "{}");
+    } catch (error) {
+      userObject = {};
+    }
+
+    if (!userId || Object.keys(userObject).length === 0) {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          const decodedToken = JSON.parse(jsonPayload);
+          
+          if (decodedToken) {
+            userId = decodedToken.sub || decodedToken.id || "";
+            userObject = {
+              id: decodedToken.sub || decodedToken.id,
+              _id: decodedToken.sub || decodedToken.id,
+              email: decodedToken.email,
+              role: decodedToken.role,
+              userType: decodedToken.role
+            };
+            
+            localStorage.setItem("userId", userId);
+            localStorage.setItem("user", JSON.stringify(userObject));
+          }
+        } catch (error) {
+          console.error('Error decoding token:', error);
+        }
+      }
+    }
+
+    return { userId, userObject };
+  };
+
+  // Helper function to check if petition belongs to user
+  const isUserOwnPetition = (petition) => {
+    const { userId, userObject } = getUserInfo();
+    
+    let creatorId =
+      petition.createdBy?._id?.toString() ||
+      petition.createdBy?.toString() ||
+      petition.ownerId?._id?.toString() ||
+      petition.ownerId?.toString() ||
+      "";
+
+    return (
+      creatorId === userId ||
+      creatorId === userObject._id ||
+      creatorId === userObject.id
+    );
+  };
 
   // Fetch user data
   useEffect(() => {
@@ -70,15 +134,6 @@ function Dashboard() {
           localStorage.setItem("user", JSON.stringify(userData));
         }
         
-        // Update stats from API response
-        if (data.stats) {
-          setUserStats({
-            myPetitions: data.stats.myPetitions || 0,
-            successfulPetitions: data.stats.successfulPetitions || 0,
-            pollsCreated: data.stats.pollsCreated || 0
-          });
-        }
-        
       } catch (error) {
         console.error("Error fetching user data:", error);
       } finally {
@@ -87,26 +142,28 @@ function Dashboard() {
     };
     
     fetchUserData();
-  }, [activeView]); // Re-fetch when returning to dashboard
+  }, [activeView]);
 
-  // Fetch petitions and calculate user stats
+  // Fetch ALL petitions and calculate stats
   useEffect(() => {
     const fetchPetitions = async () => {
       try {
+        const token = localStorage.getItem("token");
         const response = await fetch('http://localhost:4000/api/petitions', { 
-          cache: "no-store",
           headers: {
-            "Cache-Control": "no-cache"
+            "Cache-Control": "no-cache",
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
           }
         });
         
         if (!response.ok) throw new Error("Failed to fetch petitions");
         
         const data = await response.json();
-        console.log("Fetched petitions data:", data); // Debug log
+        console.log("Fetched petitions data:", data);
         
         const normalizedPetitions = data.map(p => ({
           id: p._id?.$oid || p._id || p.id,
+          _id: p._id,
           title: p.title,
           description: p.description,
           category: p.category,
@@ -117,60 +174,27 @@ function Dashboard() {
           signatures: p.signatures || []
         }));
         
-        setPetitions(normalizedPetitions);
+        // Filter active petitions from ALL users
+        const activePetitions = normalizedPetitions.filter(p => 
+          p.status === 'active' || 
+          p.status === 'under-review' || 
+          p.status === 'under_review' ||
+          p.status === 'pending'
+        );
         
-        // Use the same logic as PetitionHead for user matching
-        const userId = localStorage.getItem("userId") || "";
-        const userObject = JSON.parse(localStorage.getItem("user") || "{}");
-        
-        console.log("User ID:", userId); // Debug log
-        console.log("User Object:", userObject); // Debug log
-        
-        // Helper function to check if petition belongs to user (same as PetitionHead)
-        const isUserOwnPetition = (petition) => {
-          let creatorId;
-          if (typeof petition.createdBy === "object" && petition.createdBy !== null) {
-            creatorId = petition.createdBy._id?.toString() || petition.createdBy.toString();
-          } else {
-            creatorId = petition.createdBy?.toString();
-          }
-          return creatorId === userId || creatorId === userObject._id;
-        };
-        
-        // Helper function to check if user signed petition (same as PetitionHead)
-        const isUserSignedPetition = (petition) => {
-          if (!petition.signatures || !Array.isArray(petition.signatures)) {
-            return false;
-          }
-          const isSigned = petition.signatures.some((sig) => {
-            let sigId;
-            if (typeof sig === "object" && sig !== null) {
-              sigId = sig._id?.toString() || sig.toString();
-            } else {
-              sigId = sig?.toString();
-            }
-            return sigId === userId || sigId === userObject._id;
-          });
-          return isSigned;
-        };
-        
+        // Count user's own petitions
         const userPetitions = normalizedPetitions.filter(p => isUserOwnPetition(p));
-        const signedPetitions = normalizedPetitions.filter(p => 
-          isUserSignedPetition(p) && !isUserOwnPetition(p)
-        );
         
-        const successfulPetitions = userPetitions.filter(p => 
-          p.status === 'approved' || p.status === 'successful' || p.status === 'under-review' || p.status === 'under_review'
-        );
+        console.log("Total active petitions:", activePetitions.length);
+        console.log("User petitions count:", userPetitions.length);
         
-        console.log("User petitions count:", userPetitions.length); // Debug log
-        console.log("Signed petitions count:", signedPetitions.length); // Debug log
-        console.log("Successful petitions count:", successfulPetitions.length); // Debug log
+        // Set ALL active petitions for display (not just user's)
+        setPetitions(activePetitions);
         
         setUserStats(prev => ({
           ...prev,
-          myPetitions: userPetitions.length,
-          successfulPetitions: successfulPetitions.length
+          totalActivePetitions: activePetitions.length,
+          myPetitions: userPetitions.length
         }));
         
       } catch (error) {
@@ -182,7 +206,7 @@ function Dashboard() {
     fetchPetitions();
   }, [activeView]);
 
-  // Fetch polls and calculate user stats
+  // Fetch ALL polls and calculate stats
   useEffect(() => {
     const fetchPolls = async () => {
       try {
@@ -201,9 +225,9 @@ function Dashboard() {
         
         const data = await response.json();
         const fetchedPolls = data.polls || data;
-        console.log("Fetched polls data:", fetchedPolls); // Debug log
+        console.log("Fetched polls data:", fetchedPolls);
         
-        // Filter active polls (not closed)
+        // Filter active polls from ALL users
         const today = new Date();
         const activePolls = fetchedPolls.filter(poll => {
           if (!poll.closesOn) return true;
@@ -211,12 +235,9 @@ function Dashboard() {
           return closesDate >= today;
         });
         
-        setPolls(activePolls);
+        const { userId, userObject } = getUserInfo();
         
-        // Use the same logic for polls - matching by userId
-        const userId = localStorage.getItem("userId") || "";
-        const userObject = JSON.parse(localStorage.getItem("user") || "{}");
-        
+        // Count user's polls
         const userPolls = fetchedPolls.filter(p => {
           let creatorId;
           if (typeof p.createdBy === "object" && p.createdBy !== null) {
@@ -224,19 +245,18 @@ function Dashboard() {
           } else {
             creatorId = p.createdBy?.toString();
           }
-          const matches = creatorId === userId || creatorId === userObject._id;
-          
-          if (matches) {
-            console.log("Found user poll:", p.title); // Debug log
-          }
-          return matches;
+          return creatorId === userId || creatorId === userObject._id;
         });
         
-        console.log("User polls count:", userPolls.length); // Debug log
+        console.log("Total active polls:", activePolls.length);
+        console.log("User polls count:", userPolls.length);
+        
+        // Set ALL active polls for display (not just user's)
+        setPolls(activePolls);
         
         setUserStats(prev => ({
           ...prev,
-          pollsCreated: userPolls.length
+          totalActivePolls: activePolls.length
         }));
         
       } catch (error) {
@@ -275,6 +295,7 @@ function Dashboard() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("userId");
     navigate('/login');
   };
 
@@ -307,11 +328,9 @@ function Dashboard() {
   };
 
   const handleSuccessCallback = () => {
-    // Refresh the data when user creates a petition/poll
     setActiveView("dashboard");
-    // Force a re-render by updating the state
     setTimeout(() => {
-      window.location.reload(); // This will refresh all data
+      window.location.reload();
     }, 500);
   };
 
@@ -395,7 +414,19 @@ function Dashboard() {
               >
                 <MdOutlinePoll className="icon" />Create a Poll
               </a>
-              <Link to="/reports"><BsGraphUp className="icon" />Reports</Link>
+              <a 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveView("reports");
+                }}
+                style={{
+                  backgroundColor: activeView === "reports" ? "rgba(46, 125, 50, 0.1)" : "transparent",
+                  color: activeView === "reports" ? "var(--primary-color)" : "var(--text-color)"
+                }}
+              >
+                <BsGraphUp className="icon" />Reports
+              </a>
               <Link to="/settings"><IoMdSettings className="icon" />Settings</Link>
             </div>
             <div className="menu-list">
@@ -414,29 +445,29 @@ function Dashboard() {
             <>
               <div className="welcome-message">
                 <h1>Welcome Back, {user.name || "Username"}!</h1>
-                <p>Discover what's happening in your community and share your thoughts.</p>
+                <p>Manage your petitions and polls.</p>
               </div>
 
-              {/* Updated Stats Grid with real data and debug info */}
+              {/* Stats Grid */}
               <div className="stats-grid">
                 <div className="stat-card">
                   <h3>Total Petitions</h3>
-                  <h2>{petitions.length}</h2>
-                  <p>petitions created</p>
+                  <h2>{userStats.totalActivePetitions}</h2>
+                  <p>active</p>
                 </div>
                 <div className="stat-card">
                   <h3>My Petitions</h3>
-                  <h2>{userStats.successfulPetitions}</h2>
-                  <p>or under review</p>
+                  <h2>{userStats.myPetitions}</h2>
+                  <p>created by you</p>
                 </div>
                 <div className="stat-card">
-                  <h3>Polls Created</h3>
-                  <h2>{polls.length}</h2>
-                  <p>polls</p>
+                  <h3>Total Polls</h3>
+                  <h2>{userStats.totalActivePolls}</h2>
+                  <p>active in system</p>
                 </div>
               </div>
 
-              {/* Tab Navigation with counts */}
+              {/* Tab Navigation */}
               <div className="tab-navigation">
                 <button
                   className={`tab-btn ${activeTab === "petitions" ? "active" : ""}`}
@@ -454,9 +485,9 @@ function Dashboard() {
 
               <div className="filters-container">
                 <div className="filter-controls">
-                  <h2>Active {activeTab === "petitions" ? "Petitions" : "Polls"} Near You</h2>
+                  <h2>Active {activeTab === "petitions" ? "Petitions" : "Polls"}</h2>
                   <div className="location-filter">
-                    <label htmlFor="location">Showing For:</label>
+                    <label htmlFor="location">Filter by Location:</label>
                     <input
                       type="text"
                       id="location"
@@ -502,12 +533,12 @@ function Dashboard() {
                           {petition.status && (
                             <p><strong>Status:</strong> {petition.status}</p>
                           )}
+                          <p><strong>Signatures:</strong> {petition.signatures?.length || 0}</p>
                         </div>
                       ))}
                     </div>
                   )}
                   
-                  {/* Always show See More button for petitions */}
                   <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
                     <button onClick={handleSeeAllClick} className="clear-button">
                       {filteredPetitions.length > 3 
@@ -537,8 +568,7 @@ function Dashboard() {
                             {poll.targetLocation || poll.location || "Unknown"}
                           </p>
                           <p>
-                            <FaUserCircle /> 
-                            {poll.createdBy?.name || poll.creator || "Unknown"}
+                            <strong>Created by:</strong> {poll.createdBy?.name || "Unknown"}
                           </p>
                           <p>
                             <strong>Closes on:</strong> {
@@ -552,7 +582,6 @@ function Dashboard() {
                     </div>
                   )}
                   
-                  {/* Always show See More button for polls */}
                   <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
                     <button onClick={handleSeeAllClick} className="clear-button">
                       {filteredPolls.length > 3 
@@ -568,6 +597,8 @@ function Dashboard() {
             <PetitionPage isInDashboard={true} onSuccess={handleSuccessCallback} />
           ) : activeView === "poll" ? (
             <PollCreation isInDashboard={true} onSuccess={handleSuccessCallback} />
+          ) : activeView === "reports" ? (
+            <ReportDashboard isInDashboard={true} />
           ) : null}
         </div>
       </div>

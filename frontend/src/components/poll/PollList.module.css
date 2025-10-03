@@ -251,6 +251,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   height: fit-content;
+  height: 420px;
+  display: flex;
+  flex-direction: column;
 }
 
 .pollCard:hover {
@@ -262,6 +265,7 @@
 .closedPoll {
   opacity: 0.7;
   border-color: #e5e7eb;
+  
 }
 
 .closedPoll:hover {
@@ -512,4 +516,284 @@
     gap: 0.5rem;
     align-items: flex-start;
   }
+}
+
+.pollCard {
+  overflow: visible;
+  height: auto;
+}
+
+.pollOptions {
+  overflow: visible;
+  margin: 1rem 0;
+}
+
+.optionsList {
+  overflow: visible;
+  flex-wrap: wrap;
+}
+
+.optionTag {
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Add these styles to your PollList.module.css file */
+
+/* Status Tabs Section */
+.statusTabs {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.statusTab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.statusTab:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.statusTab.activeTab {
+  background: #2e7d32;
+  color: white;
+  border-color: #2e7d32;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+}
+
+.tabCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 0.5rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.statusTab.activeTab .tabCount {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+/* Responsive Design for Tabs */
+@media (max-width: 768px) {
+  .statusTabs {
+    gap: 0.5rem;
+    padding: 0.4rem;
+  }
+  
+  .statusTab {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .tabCount {
+    min-width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Update existing styles if needed */
+.controlsSection {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Results info update */
+.resultsInfo {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  background: #f0f7f1;
+  border-left: 4px solid #2e7d32;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.resultsInfo p {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Empty state improvements */
+.emptyState {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin: 2rem 0;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.emptyState h3 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.emptyState p {
+  font-size: 1rem;
+  color: #666;
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Loading improvements */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  gap: 1rem;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #2e7d32;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading p {
+  font-size: 1rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Error message styling */
+.errorMessage {
+  text-align: center;
+  padding: 2rem;
+  background: #ffebee;
+  border-radius: 12px;
+  margin: 2rem 0;
+}
+
+.errorMessage p {
+  color: #c62828;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.retryButton {
+  padding: 0.75rem 1.5rem;
+  background: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.retryButton:hover {
+  background: #1b5e20;
+}
+
+/* Poll card status specific styling */
+.closedPoll {
+  opacity: 0.85;
+  border: 2px solid #e0e0e0;
+}
+
+.closedPoll:hover {
+  opacity: 1;
+}
+
+.closedText {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.activeText {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+/* Status Tabs + Search layout */
+.tabsAndSearch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.statusTabs {
+  display: flex;
+  gap: 10px;
+}
+
+.searchFormRight {
+  display: flex;
+  align-items: center;
+}
+
+.searchInputGroup {
+  display: flex;
+  align-items: center;
+}
+
+.tabsAndSearch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.statusTabs {
+  display: flex;
+  gap: 10px;
+}
+
+.searchFormRight {
+  display: flex;
+  align-items: center;
+}
+
+.searchInputGroup {
+  display: flex;
+  align-items: center;
+}
+
+.pageInfo {
+  margin: 0 10px;
 }

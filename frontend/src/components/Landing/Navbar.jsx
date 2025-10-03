@@ -13,13 +13,6 @@ const Navbar = ({ scrollToFooter }) => {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUser(null);
-    navigate("/login");
-  };
-
   const handleAboutClick = (e) => {
     e.preventDefault();
     if (scrollToFooter) {
@@ -93,12 +86,6 @@ const Navbar = ({ scrollToFooter }) => {
                 >
                   Hi, {user.name}
                 </span>
-                <button
-                  onClick={handleLogout}
-                  className={`${styles.button} ${styles.dangerButton} ${styles.roundedPill} ${styles.px3}`}
-                >
-                  Logout
-                </button>
               </>
             ) : (
               <>

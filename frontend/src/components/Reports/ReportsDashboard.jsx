@@ -1,0 +1,581 @@
+import React, { useState, useEffect } from 'react';
+import { BarChart, PieChart, Pie, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+const BASE_URL = 'http://localhost:4000/api';
+
+const COLORS_PETITION = ['#0088FE', '#00C49F', '#FFBB28']; // Active, Closed, Under Review
+const COLORS_CATEGORY = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7c7c'];
+const COLORS_POLL = ['#8884d8', '#ff7300']; // Active, Closed
+
+const renderPieLabel = ({ name, value, percent }) => {
+  if (value > 0) {
+    return `${name} (${value})`;
+  }
+  return '';
+};
+
+const ReportDashboard = ({ isInDashboard }) => {
+  const [petitionData, setPetitionData] = useState([]);
+  const [petitionCategoryData, setPetitionCategoryData] = useState([]);
+  const [pollData, setPollData] = useState([]);
+  const [userStats, setUserStats] = useState({
+    totalPetitions: 0,
+    activePetitions: 0,
+    closedPetitions: 0,
+    totalPolls: 0,
+    totalVotes: 0,
+  });
+  const [systemStats, setSystemStats] = useState({
+    totalPetitions: 0,
+    activePetitions: 0,
+    closedPetitions: 0,
+    totalPolls: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+
+  // Get auth token from localStorage
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  // Fetch petition data
+  const fetchPetitionData = async () => {
+    try {
+      const headers = getAuthHeaders();
+      
+      // Fetch all petitions without filters first
+      const response = await fetch(`${BASE_URL}/petitions`, { headers });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch petitions');
+      }
+      
+      const allPetitions = await response.json();
+      
+      // Count petitions by status
+      const statusCounts = {
+        active: 0,
+        closed: 0,
+        'under-review': 0
+      };
+      
+      // Count petitions by category
+      const categoryCounts = {};
+      
+      allPetitions.forEach(petition => {
+        // Count by status
+        const status = petition.status || 'active';
+        if (status === 'active' || status === 'pending') {
+          statusCounts.active++;
+        } else if (status === 'closed' || status === 'completed') {
+          statusCounts.closed++;
+        } else if (status === 'under-review' || status === 'under_review') {
+          statusCounts['under-review']++;
+        }
+        
+        // Count by category
+        const category = petition.category || 'Uncategorized';
+        categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+      });
+      
+      // Format data for status charts
+      const statusChartData = [
+        { name: 'Active', value: statusCounts.active, status: 'Active' },
+        { name: 'Closed', value: statusCounts.closed, status: 'Closed' },
+        { name: 'Under Review', value: statusCounts['under-review'], status: 'Under Review' },
+      ];
+      
+      setPetitionData(statusChartData);
+      
+      // Format data for category chart
+      const categoryChartData = Object.entries(categoryCounts).map(([category, count]) => ({
+        name: category,
+        value: count,
+        category: category
+      }));
+      
+      setPetitionCategoryData(categoryChartData);
+      
+      // Update user stats for petitions
+      const userId = localStorage.getItem('userId');
+      const userPetitions = allPetitions.filter(p => {
+        const creatorId = p.createdBy?._id || p.createdBy || p.ownerId?._id || p.ownerId;
+        return creatorId === userId;
+      });
+      
+      const activeUserPetitions = userPetitions.filter(p => 
+        p.status === 'active' || p.status === 'pending'
+      );
+      
+      const closedUserPetitions = userPetitions.filter(p => 
+        p.status === 'closed' || p.status === 'completed'
+      );
+      
+      setUserStats(prev => ({
+        ...prev,
+        totalPetitions: userPetitions.length,
+        activePetitions: activeUserPetitions.length,
+        closedPetitions: closedUserPetitions.length,
+      }));
+      
+      // Update system-wide stats
+      setSystemStats(prev => ({
+        ...prev,
+        totalPetitions: allPetitions.length,
+        activePetitions: statusCounts.active,
+        closedPetitions: statusCounts.closed,
+      }));
+      
+    } catch (err) {
+      console.error('Error fetching petition data:', err);
+      setPetitionData([
+        { name: 'Active', value: 0, status: 'Active' },
+        { name: 'Closed', value: 0, status: 'Closed' },
+        { name: 'Under Review', value: 0, status: 'Under Review' },
+      ]);
+      setPetitionCategoryData([]);
+    }
+  };
+
+  // Fetch poll data
+  const fetchPollData = async () => {
+    try {
+      const headers = getAuthHeaders();
+      
+      // Try multiple endpoints to fetch polls
+      let allPolls = [];
+      
+      try {
+        const response = await fetch(`${BASE_URL}/polls/list?limit=100`, { headers });
+        if (response.ok) {
+          const data = await response.json();
+          allPolls = data.polls || data;
+        }
+      } catch (e) {
+        console.log('List endpoint failed, trying alternative...');
+      }
+      
+      // If list endpoint fails, try without the /list path
+      if (allPolls.length === 0) {
+        try {
+          const response = await fetch(`${BASE_URL}/polls?limit=100`, { headers });
+          if (response.ok) {
+            const data = await response.json();
+            allPolls = Array.isArray(data) ? data : (data.polls || []);
+          }
+        } catch (e) {
+          console.log('Alternative endpoint also failed');
+        }
+      }
+      
+      console.log('Fetched polls:', allPolls.length);
+      
+      // Count polls by status (system-wide data for charts)
+      const today = new Date();
+      let activeCount = 0;
+      let closedCount = 0;
+      
+      if (Array.isArray(allPolls)) {
+        allPolls.forEach(poll => {
+          const closesOn = poll.closesOn || poll.endDate || poll.expiresAt;
+          if (!closesOn || new Date(closesOn) >= today) {
+            activeCount++;
+          } else {
+            closedCount++;
+          }
+        });
+      }
+      
+      // Format data for charts (ALWAYS show data, even if counts are zero)
+      const chartData = [
+        { name: 'Active', value: activeCount, status: 'Active' },
+        { name: 'Closed', value: closedCount, status: 'Closed' },
+      ];
+      
+      setPollData(chartData);
+      
+      // Update user stats for polls (user-specific data)
+      const userId = localStorage.getItem('userId');
+      const userPolls = Array.isArray(allPolls) ? allPolls.filter(p => {
+        // Safe check for createdBy
+        if (!p.createdBy) return false;
+        
+        const creatorId = typeof p.createdBy === 'object' 
+          ? (p.createdBy?._id || p.createdBy?.toString())
+          : p.createdBy;
+        
+        return creatorId === userId;
+      }) : [];
+      
+      let totalVotes = 0;
+      userPolls.forEach(poll => {
+        if (poll.options && Array.isArray(poll.options)) {
+          poll.options.forEach(option => {
+            totalVotes += option.votes || 0;
+          });
+        }
+      });
+      
+      setUserStats(prev => ({
+        ...prev,
+        totalPolls: userPolls.length,
+        totalVotes: totalVotes,
+      }));
+      
+      // Update system-wide poll stats
+      setSystemStats(prev => ({
+        ...prev,
+        totalPolls: allPolls.length,
+      }));
+      
+    } catch (err) {
+      console.error('Error fetching poll data:', err);
+      // Set default data even on error
+      setPollData([
+        { name: 'Active', value: 0, status: 'Active' },
+        { name: 'Closed', value: 0, status: 'Closed' },
+      ]);
+    }
+  };
+
+  // Handle PDF/CSV download
+  const handleDownload = async (type) => {
+    setDownloading(true);
+    setError(null);
+
+    try {
+      const headers = getAuthHeaders();
+      const response = await fetch(`${BASE_URL}/reports/export?type=${type}`, {
+        headers,
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.statusText}`);
+      }
+
+      // Get the blob from response
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `civic_report_${new Date().toISOString().slice(0, 10)}.${type}`);
+      
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      setError(`${type.toUpperCase()} downloaded successfully!`);
+      setTimeout(() => setError(null), 3000);
+
+    } catch (err) {
+      console.error(`Download failed for ${type}:`, err);
+      setError(`Failed to download ${type.toUpperCase()}. Please try again.`);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  // Fetch all data on component mount
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchPetitionData(),
+        fetchPollData()
+      ]);
+      setLoading(false);
+    };
+    
+    fetchAllData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ 
+        padding: '40px', 
+        textAlign: 'center',
+        fontSize: '1.2rem',
+        color: '#666'
+      }}>
+        Loading Report Data...
+      </div>
+    );
+  }
+
+  // Apply inline styles when used inside dashboard
+  const containerStyle = isInDashboard ? {
+    padding: '20px',
+    backgroundColor: '#f4f7f9',
+    borderRadius: '8px',
+    maxWidth: '100%'
+  } : {};
+
+  return (
+    <div className="report-dashboard" style={containerStyle}>
+      {/* User Activity Summary */}
+      <section className="report-section user-section">
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px',
+          flexWrap: 'wrap',
+        }}>
+          <div>
+            <h2>Your Activity Summary</h2>
+            <p className="summary-note" style={{ marginTop: '5px', color: '#888' }}>
+              Statistics for petitions and polls you created
+            </p>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            gap: '10px',
+            paddingTop: '5px'
+          }}>
+            <button 
+              onClick={() => handleDownload('pdf')} 
+              className="export-btn pdf-btn"
+              disabled={downloading}
+              style={{ 
+                padding: '8px 15px', 
+                fontSize: '0.9em',
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: downloading ? 'not-allowed' : 'pointer',
+                opacity: downloading ? 0.6 : 1
+              }}
+            >
+              {downloading ? 'Downloading...' : 'Download PDF 📄'}
+            </button>
+            <button 
+              onClick={() => handleDownload('csv')} 
+              className="export-btn csv-btn"
+              disabled={downloading}
+              style={{ 
+                padding: '8px 15px', 
+                fontSize: '0.9em',
+                backgroundColor: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: downloading ? 'not-allowed' : 'pointer',
+                opacity: downloading ? 0.6 : 1
+              }}
+            >
+              {downloading ? 'Downloading...' : 'Download CSV 📊'}
+            </button>
+          </div>
+        </div>
+
+        {error && (
+          <div style={{
+            padding: '10px',
+            marginBottom: '20px',
+            borderRadius: '4px',
+            backgroundColor: error.includes('success') ? '#d4edda' : '#f8d7da',
+            color: error.includes('success') ? '#155724' : '#721c24',
+            border: `1px solid ${error.includes('success') ? '#c3e6cb' : '#f5c6cb'}`
+          }}>
+            {error}
+          </div>
+        )}
+
+        <div className="stat-grid" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '20px'
+        }}>
+          <div className="stat-card" style={{
+            backgroundColor: '#e9ecef',
+            padding: '20px',
+            borderRadius: '8px',
+            textAlign: 'center'
+          }}>
+            <h4>My Total Created Petitions</h4>
+            <p style={{ fontSize: '2.5em', fontWeight: '600', color: '#007bff' }}>
+              {userStats.totalPetitions}
+            </p>
+          </div>
+          <div className="stat-card" style={{
+            backgroundColor: '#e9ecef',
+            padding: '20px',
+            borderRadius: '8px',
+            textAlign: 'center'
+          }}>
+            <h4>My Active Petitions</h4>
+            <p style={{ fontSize: '2.5em', fontWeight: '600', color: '#007bff' }}>
+              {userStats.activePetitions}
+            </p>
+          </div>
+          <div className="stat-card" style={{
+            backgroundColor: '#e9ecef',
+            padding: '20px',
+            borderRadius: '8px',
+            textAlign: 'center'
+          }}>
+            <h4>My Closed Petitions</h4>
+            <p style={{ fontSize: '2.5em', fontWeight: '600', color: '#007bff' }}>
+              {userStats.closedPetitions}
+            </p>
+          </div>
+          <div className="stat-card" style={{
+            backgroundColor: '#e9ecef',
+            padding: '20px',
+            borderRadius: '8px',
+            textAlign: 'center'
+          }}>
+            <h4>My Total Created Polls</h4>
+            <p style={{ fontSize: '2.5em', fontWeight: '600', color: '#007bff' }}>
+              {userStats.totalPolls}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <hr style={{ border: 'none', borderTop: '1px dashed #ccc', margin: '40px 0' }} />
+
+      {/* Petition Status Overview */}
+      <section className="report-section petitions-section">
+        
+        <div className="chart-container" style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
+          <div className="chart-box" style={{
+            flex: 1,
+            minWidth: '300px',
+            padding: '15px',
+            border: '1px solid #eee',
+            borderRadius: '6px',
+            backgroundColor: 'white'
+          }}>
+            <h3 style={{ textAlign: 'center', color: '#555' }}>Petitions by Category</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={petitionCategoryData}
+                  dataKey="value"
+                  nameKey="category"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  fill="#8884d8"
+                  label={renderPieLabel}
+                  labelLine={false}
+                >
+                  {petitionCategoryData.map((entry, index) => (
+                    <Cell key={`cell-category-${index}`} fill={COLORS_CATEGORY[index % COLORS_CATEGORY.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="chart-box" style={{
+            flex: 1,
+            minWidth: '300px',
+            padding: '15px',
+            border: '1px solid #eee',
+            borderRadius: '6px',
+            backgroundColor: 'white'
+          }}>
+            <h3 style={{ textAlign: 'center', color: '#555' }}>Petitions by Status</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={petitionData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="status" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" name="Total Count">
+                  {petitionData.map((entry, index) => (
+                    <Cell key={`bar-petition-${index}`} fill={COLORS_PETITION[index % COLORS_PETITION.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </section>
+
+      <hr style={{ border: 'none', borderTop: '1px dashed #ccc', margin: '40px 0' }} />
+
+      {/* Poll Status Overview */}
+      <section className="report-section polls-section">
+        <h2 style={{ borderBottom: '2px solid #007bff', paddingBottom: '10px', color: '#007bff' }}>
+          System-wide Poll Overview
+        </h2>
+        <div className="chart-container" style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
+          <div className="chart-box" style={{
+            flex: 1,
+            minWidth: '300px',
+            padding: '15px',
+            border: '1px solid #eee',
+            borderRadius: '6px',
+            backgroundColor: 'white'
+          }}>
+            <h3 style={{ textAlign: 'center', color: '#555' }}>Poll Status Distribution</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pollData}
+                  dataKey="value"
+                  nameKey="status"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  label={renderPieLabel}
+                  labelLine={false}
+                >
+                  {pollData.map((entry, index) => (
+                    <Cell key={`cell-poll-${index}`} fill={COLORS_POLL[index % COLORS_POLL.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="chart-box" style={{
+            flex: 1,
+            minWidth: '300px',
+            padding: '15px',
+            border: '1px solid #eee',
+            borderRadius: '6px',
+            backgroundColor: 'white'
+          }}>
+            <h3 style={{ textAlign: 'center', color: '#555' }}>Poll Counts</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={pollData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="status" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" name="Total Count">
+                  {pollData.map((entry, index) => (
+                    <Cell key={`bar-poll-${index}`} fill={COLORS_POLL[index % COLORS_POLL.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default ReportDashboard;

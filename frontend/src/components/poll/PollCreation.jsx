@@ -274,17 +274,6 @@ const PollCreation = ({ onSuccess, isInDashboard = false }) => {
               )}
             </button>
           </div>
-
-          <div className={styles.formInfo}>
-            <h4>Poll Creation Guidelines:</h4>
-            <ul>
-              <li>Write a clear, unbiased question as your poll title</li>
-              <li>Provide sufficient context in the description</li>
-              <li>Create balanced and fair options for voters</li>
-              <li>Set a reasonable closing date (recommended: 7-30 days)</li>
-              <li>Specify location if the poll is region-specific</li>
-            </ul>
-          </div>
         </form>
       </div>
     </div>

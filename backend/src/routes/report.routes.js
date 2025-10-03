@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { requireAuth } from "../middleware/auth.js";
+import { requireAuth } from '../middleware/auth.js';
+import { isOfficial } from '../middleware/role.js';
 import Petition from "../models/Petition.js";
 import Poll from "../models/poll.js";
 import Vote from "../models/vote.js";
@@ -12,7 +13,7 @@ const router = Router();
  * Customer Report Dashboard (full history)
  * GET /api/reports
  */
-router.get("/", requireAuth, async (req, res) => {
+router.get("/", requireAuth, isOfficial, async (req, res) => {
   try {
     const userId = req.user._id;
 

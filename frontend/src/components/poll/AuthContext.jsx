@@ -11,3 +11,6 @@ export function AuthProvider({ children }) {
   );
 }
 export const useAuth = () => useContext(AuthContext);
+
+
+src/components/Auth/AuthContext.jsx

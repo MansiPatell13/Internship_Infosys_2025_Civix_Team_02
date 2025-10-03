@@ -17,6 +17,7 @@ import PollCreation from './components/NavbarPoll/PollCreation.jsx';
 import PollHead from './components/poll/PollHead.jsx'
 import PollPage from './pages/PollPage.jsx';
 import { AuthProvider } from '../src/components/Auth/AuthContext.jsx';
+import ReportDashboard from './components/Reports/ReportsDashboard.jsx';
 function App() {
   
   return (
@@ -39,6 +40,7 @@ function App() {
         <Route path='/poll-creation' element={<PollCreation/>}/>
         <Route path='poll-head' element={<PollHead/>}/>
         <Route path="/polls" element={<PollPage />} />
+         <Route path="/reports" element={<ReportDashboard />} />
       </Routes>
     </Router>
     </AuthProvider>

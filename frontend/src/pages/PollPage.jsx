@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import { useAuth } from '../components/Auth/AuthContext';
-import PollList from '../components/Poll/PollList';
+import PollList from '../components/poll/PollList';
 import PollCreation from '../components/poll/PollCreation';
 import styles from '../pages/PollPage.module.css';
 import { useNavigate } from 'react-router-dom';

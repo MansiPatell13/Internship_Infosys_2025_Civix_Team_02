@@ -1,10 +1,15 @@
 // /routes/dashboard.routes.js
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
+import { isOfficial } from "../middleware/role.js";
+import { preventCache } from "../middleware/cacheControl.js";
 import Petition from "../models/Petition.js";
 import Poll from "../models/poll.js";
 
 const router = Router();
+
+// Apply cache control to all dashboard routes
+router.use(preventCache);
 
 /**
  *  Dashboard Stats
@@ -14,24 +19,74 @@ router.get("/", requireAuth, async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // Count only the user's own petitions and polls
-    const totalPetitions = await Petition.countDocuments({ createdBy: userId });
-    const totalPolls = await Poll.countDocuments({ createdBy: userId });
+        // Different stats for officials and citizens
+    let stats = {};
+    
+    if (req.user.role === 'official') {
+      // For officials, show petitions and polls in their location
+      const locationPetitions = await Petition.find({ location: req.user.location })
+        .populate('creator', 'name email')
+        .sort('-createdAt');
+      
+      const locationPolls = await Poll.find({ target_location: req.user.location })
+        .populate('createdBy', 'name email')
+        .sort('-createdAt');
 
-    // Active engagements (user's active petitions + polls)
-    const activePetitions = await Petition.countDocuments({ createdBy: userId, status: "active" });
-    const activePolls = await Poll.countDocuments({ createdBy: userId, status: "active" });
+      // Active engagements for official's location
+      const activePetitions = locationPetitions.filter(p => p.status === 'active');
+      const activePolls = locationPolls.filter(p => p.status === 'active');
 
-    const activeEngagements = activePetitions + activePolls;
+      stats = {
+        location: req.user.location,
+        petitions: {
+          total: locationPetitions.length,
+          active: activePetitions.length,
+          underReview: locationPetitions.filter(p => p.status === 'under_review').length,
+          closed: locationPetitions.filter(p => p.status === 'closed').length,
+          recentPetitions: locationPetitions.slice(0, 5) // Last 5 petitions
+        },
+        polls: {
+          total: locationPolls.length,
+          active: activePolls.length,
+          closed: locationPolls.filter(p => p.status === 'closed').length,
+          recentPolls: locationPolls.slice(0, 5) // Last 5 polls
+        },
+        activeEngagements: activePetitions.length + activePolls.length
+      };
+    } else {
+      // For citizens, show their own petitions and polls
+      const userPetitions = await Petition.find({ creator: userId }).sort('-createdAt');
+      const userPolls = await Poll.find({ createdBy: userId }).sort('-createdAt');
+
+      // Active engagements for citizen
+      const activePetitions = userPetitions.filter(p => p.status === 'active');
+      const activePolls = userPolls.filter(p => p.status === 'active');
+
+      stats = {
+        petitions: {
+          total: userPetitions.length,
+          active: activePetitions.length,
+          recentPetitions: userPetitions.slice(0, 5) // Last 5 petitions
+        },
+        polls: {
+          total: userPolls.length,
+          active: activePolls.length,
+          recentPolls: userPolls.slice(0, 5) // Last 5 polls
+        },
+        activeEngagements: activePetitions.length + activePolls.length
+      };
+    }
 
     res.json({
       message: `Welcome to your dashboard, ${req.user.name}`,
-      user: req.user,
-      stats: {
-        petitions: totalPetitions,
-        polls: totalPolls,
-        activeEngagements
-      }
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+        location: req.user.location
+      },
+      stats
     });
 
   } catch (error) {

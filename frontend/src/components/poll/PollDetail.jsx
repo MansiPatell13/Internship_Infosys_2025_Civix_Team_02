@@ -28,7 +28,7 @@ const PollDetail = ({ pollId, onBack, onVoteSuccess }) => {
       const pollData = response.poll || response;
       setPoll(pollData);
       
-      // Calculate results and total votes
+      // Calculate results and total votes from poll options
       const calculatedResults = {};
       let total = 0;
       
@@ -43,24 +43,15 @@ const PollDetail = ({ pollId, onBack, onVoteSuccess }) => {
       setResults(calculatedResults);
       setTotalVotes(total);
       
-      // Check vote status
+      // Check if user has already voted (from backend response if available)
       const userHasVoted = response.hasVoted === true || 
                           response.userVoted === true ||
                           response.voted === true ||
-                          (response.userVote !== undefined && response.userVote !== null) ||
-                          pollData.hasVoted === true ||
-                          pollData.userVoted === true ||
-                          pollData.voted === true ||
-                          (pollData.userVote !== undefined && pollData.userVote !== null);
+                          (response.userVote !== undefined && response.userVote !== null);
       
       if (userHasVoted) {
         setHasVoted(true);
-        const voteIndex = response.userVote ?? 
-                         response.userVoteIndex ?? 
-                         response.voteIndex ??
-                         pollData.userVote ?? 
-                         pollData.userVoteIndex ??
-                         pollData.voteIndex;
+        const voteIndex = response.userVote ?? response.userVoteIndex ?? response.voteIndex;
         setUserVote(voteIndex !== undefined ? voteIndex : null);
       } else {
         setHasVoted(false);
@@ -68,6 +59,7 @@ const PollDetail = ({ pollId, onBack, onVoteSuccess }) => {
       }
       
     } catch (err) {
+      console.error('Error fetching poll:', err);
       setError(err.message || 'Failed to fetch poll details');
     } finally {
       setLoading(false);
@@ -87,6 +79,12 @@ const PollDetail = ({ pollId, onBack, onVoteSuccess }) => {
       return;
     }
     
+    // Check if user is a citizen
+    if (user?.role !== 'citizen') {
+      setVoteError("Only citizens can vote on polls.");
+      return;
+    }
+    
     if (hasVoted) {
       setVoteError("You have already voted on this poll.");
       return;
@@ -98,9 +96,11 @@ const PollDetail = ({ pollId, onBack, onVoteSuccess }) => {
     try {
       await pollAPI.vote(pollId, selectedOption.toString());
       
+      // Update local state immediately
       setHasVoted(true);
       setUserVote(selectedOption);
       
+      // Refetch poll data to get updated results from server
       await fetchPollDetails();
       
       if (onVoteSuccess) {
@@ -108,6 +108,8 @@ const PollDetail = ({ pollId, onBack, onVoteSuccess }) => {
       }
       
     } catch (err) {
+      console.error('Vote error:', err);
+      
       const errorMessage = err.message || "Failed to submit vote.";
       
       if (errorMessage.toLowerCase().includes('already voted')) {
@@ -122,7 +124,6 @@ const PollDetail = ({ pollId, onBack, onVoteSuccess }) => {
     }
   };
 
-  // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -264,7 +265,7 @@ const PollDetail = ({ pollId, onBack, onVoteSuccess }) => {
                'Poll options:'}
             </h3>
             
-            {hasVoted && (
+            {hasVoted && user?.role === 'citizen' && (
               <div className={styles.voteConfirmation}>
                 <FaCheckCircle className={styles.checkIcon} />
                 <span>Thank you for voting!</span>
@@ -334,37 +335,36 @@ const PollDetail = ({ pollId, onBack, onVoteSuccess }) => {
             </div>
             
             {canVote && (
-  <div className={styles.voteActions}>
-    {voteError && !hasVoted && (   // only show error if not already voted
-      <div className={styles.voteError}>
-        <p>{voteError}</p>
-      </div>
-    )}
-
-    <button 
-      onClick={handleVote}
-      disabled={voting || selectedOption === null || hasVoted} // disable after vote
-      className={styles.voteButton}
-    >
-      {voting ? (
-        <>
-          <div className={styles.buttonSpinner}></div>
-          Submitting...
-        </>
-      ) : (
-        <>
-          <FaVoteYea />
-          {hasVoted ? "Vote Submitted" : "Submit Vote"}   {/* update button text */}
-        </>
-      )}
-    </button>
-  </div>
-)}
-
+              <div className={styles.voteActions}>
+                {voteError && (
+                  <div className={styles.voteError}>
+                    <p>{voteError}</p>
+                  </div>
+                )}
+                
+                <button 
+                  onClick={handleVote}
+                  disabled={voting || selectedOption === null}
+                  className={styles.voteButton}
+                >
+                  {voting ? (
+                    <>
+                      <div className={styles.buttonSpinner}></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <FaVoteYea />
+                      Submit Vote
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
             
             {user?.role !== 'citizen' && !isExpired && (
               <div className={styles.infoMessage}>
-                <p>Only citizens can vote on polls. You are registered as: {user?.role}</p>
+                <p>Only citizens can vote on polls. You can view results as an {user?.role}.</p>
               </div>
             )}
           </div>

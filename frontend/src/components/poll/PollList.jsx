@@ -3,7 +3,7 @@ import { FaMapMarkerAlt, FaClock, FaUsers, FaSearch, FaFilter } from 'react-icon
 import { MdOutlinePoll } from 'react-icons/md';
 import { useAuth } from '../Auth/AuthContext';
 import { pollAPI } from '../../utils/api';
-import PollDetail from './PollDetail';
+import PollDetail from '../poll/PollDetail';
 import styles from './PollList.module.css';
 
 const PollList = () => {
@@ -13,7 +13,6 @@ const PollList = () => {
   const [error, setError] = useState('');
   const [selectedPoll, setSelectedPoll] = useState(null);
   
-  // Filter and pagination states
   const [filters, setFilters] = useState({
     location: '',
     createdBy: '',
@@ -25,7 +24,6 @@ const PollList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Fetch polls
   const fetchPolls = async () => {
     try {
       setLoading(true);
@@ -47,39 +45,33 @@ const PollList = () => {
     }
   };
 
-  // Initial fetch and refetch on filter changes
   useEffect(() => {
     fetchPolls();
   }, [filters]);
 
-  // Handle search
   const handleSearch = (e) => {
     e.preventDefault();
     setFilters(prev => ({ ...prev, page: 1 }));
     fetchPolls();
   };
 
-  // Handle filter changes
   const handleFilterChange = (filterName, value) => {
     setFilters(prev => ({
       ...prev,
       [filterName]: value,
-      page: 1 // Reset to first page when filters change
+      page: 1
     }));
   };
 
-  // Handle pagination
   const handlePageChange = (newPage) => {
     setFilters(prev => ({ ...prev, page: newPage }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Calculate pagination
   const totalPages = Math.ceil(totalCount / filters.limit);
   const startItem = (filters.page - 1) * filters.limit + 1;
   const endItem = Math.min(filters.page * filters.limit, totalCount);
 
-  // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -97,7 +89,6 @@ const PollList = () => {
     }
   };
 
-  // Check if poll is closed
   const isPollClosed = (closesOn) => {
     return new Date(closesOn) < new Date();
   };
@@ -133,7 +124,6 @@ const PollList = () => {
         </div>
       </div>
 
-      {/* Search and Filters */}
       <div className={styles.controlsSection}>
         <form onSubmit={handleSearch} className={styles.searchForm}>
           <div className={styles.searchInputGroup}>
@@ -190,7 +180,6 @@ const PollList = () => {
         </div>
       </div>
 
-      {/* Results Info */}
       {!loading && (
         <div className={styles.resultsInfo}>
           <p>
@@ -200,7 +189,6 @@ const PollList = () => {
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
         <div className={styles.errorMessage}>
           <p>{error}</p>
@@ -210,7 +198,6 @@ const PollList = () => {
         </div>
       )}
 
-      {/* Loading State */}
       {loading && (
         <div className={styles.loading}>
           <div className={styles.loadingSpinner}></div>
@@ -218,7 +205,6 @@ const PollList = () => {
         </div>
       )}
 
-      {/* Polls Grid */}
       {!loading && polls.length > 0 && (
         <div className={styles.pollsGrid}>
           {polls.map((poll) => (
@@ -295,7 +281,6 @@ const PollList = () => {
         </div>
       )}
 
-      {/* Empty State */}
       {!loading && polls.length === 0 && !error && (
         <div className={styles.emptyState}>
           <MdOutlinePoll className={styles.emptyIcon} />
@@ -303,13 +288,12 @@ const PollList = () => {
           <p>
             {searchTerm 
               ? `No polls found matching "${searchTerm}". Try a different search term.`
-              : 'No polls are available at the moment. Be the first to create one!'
+              : 'No polls are available at the moment.'
             }
           </p>
         </div>
       )}
 
-      {/* Pagination */}
       {!loading && polls.length > 0 && totalPages > 1 && (
         <div className={styles.pagination}>
           <button
