@@ -19,11 +19,12 @@ import PollPage from './pages/PollPage.jsx';
 import { AuthProvider } from '../src/components/Auth/AuthContext.jsx';
 import Settings from './components/setting/setting.jsx';
 import ProtectedRoute from './components/ProtectedRoute';
-
+import ReportDashboard from './components/Reports/ReportsDashboard.jsx';
 function App() {
   
   return (
     <AuthProvider>
+      
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/home" />} /> 
@@ -48,7 +49,7 @@ function App() {
         <Route path='poll-head' element={<PollHead/>}/>
         <Route path="/polls" element={<PollPage />} />
         <Route path="/settings" element={<Settings />} />
-       
+      <Route path="/reports" element={<ReportDashboard />} />
       </Routes>
     </Router>
     </AuthProvider>
