@@ -9,6 +9,10 @@
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f8fafc 100%);
 }
 
+.listContainer {
+  padding: 0 2rem 2rem 2rem;
+}
+
 .notAuthenticated {
   display: flex;
   flex-direction: column;
@@ -45,6 +49,7 @@
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s ease;
+  margin-top: 15px;
 }
 
 .backToPollsBtn:hover {
@@ -54,9 +59,8 @@
 }
 
 .pollsHeader {
-  padding: 2rem;
-  background: white;
   margin: 2rem;
+  background: white;
   border-radius: 16px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border: 1px solid #f1f5f9;
@@ -66,42 +70,38 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 2rem 0;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.welcomeSection h1 {
-  font-size: 2rem;
-  color: #1e293b;
-  margin: 0 0 0.5rem 0;
-  font-weight: 700;
+.titleSection {
+  flex: 1;
+  min-width: 300px;
 }
 
-.welcomeSection p {
-  color: #64748b;
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.createPollBtn {
+.title {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: white;
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.3);
+  gap: 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
 }
 
-.createPollBtn:hover {
-  background: linear-gradient(135deg, #16a34a, #15803d);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 10px -1px rgba(34, 197, 94, 0.4);
+.titleIcon {
+  color: #22c55e;
+  font-size: 2rem;
 }
+
+.subtitle {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* .createPollBtn removed */
 
 .roleInfo {
   margin-top: 1rem;
@@ -117,11 +117,463 @@
   font-size: 0.925rem;
 }
 
+/* Poll List Section Styles */
+.tabsAndSearchContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.statusTabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.statusTab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #f8f9fa;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.activeTab {
+  background: #2e7d32;
+  color: white;
+  border-color: #2e7d32;
+}
+
+.tabCount {
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  position: relative;
+  max-width: 400px;
+  flex: 1;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  color: #94a3b8;
+  z-index: 1;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px 0 0 8px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.searchButton {
+  padding: 0.75rem 1.5rem;
+  background: #22c55e;
+  color: white;
+  border: none;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.resultsInfo {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f0f7f1;
+  border-left: 4px solid #2e7d32;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #22c55e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.pollsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.pollCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 2px solid #f1f5f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.closedPoll {
+  opacity: 0.75;
+}
+
+.pollHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.pollTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  flex: 1;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.activeBadge {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #a7f3d0;
+}
+
+.closedBadge {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+.pollDescription {
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.optionsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.optionsLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.optionsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.optionTag {
+  padding: 0.25rem 0.75rem;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  border: 1px solid #e2e8f0;
+}
+
+.moreOptions {
+  padding: 0.25rem 0.75rem;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  border: 1px solid #a7f3d0;
+  font-weight: 600;
+}
+
+.pollMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.metaIcon {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.activeText {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.closedText {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.pollFooter {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #94a3b8;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.pageNumbers {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.pageButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.activePageButton {
+  background: #22c55e;
+  color: white;
+  border-color: #22c55e;
+}
+
+.disabledButton {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Poll Detail Section Styles */
+.detailCard {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border: 1px solid #f1f5f9;
+  margin-top: 1rem;
+  margin: 1.5rem;
+}
+
+.detailHeader {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.detailTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+}
+
+.detailMeta {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.detailDescription {
+  color: #64748b;
+  line-height: 1.6;
+  font-size: 1.05rem;
+  margin-bottom: 2rem;
+}
+
+.votingSection {
+  margin-top: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 1.5rem 0;
+}
+
+.voteConfirmation {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #dcfce7;
+  border: 2px solid #a7f3d0;
+  border-radius: 8px;
+  color: #166534;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.checkIcon {
+  color: #22c55e;
+  font-size: 18px;
+}
+
+.optionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.voteOption {
+  border: 2px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.selectedOption {
+  border-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.optionHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.radioInput {
+  width: 18px;
+  height: 18px;
+  accent-color: #22c55e;
+}
+
+.optionText {
+  flex: 1;
+  font-weight: 600;
+  color: #374151;
+  font-size: 1.05rem;
+}
+
+.voteStats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.voteCount {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.percentage {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.75rem;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.voteButton {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.05rem;
+  box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);
+  transition: all 0.2s ease;
+}
+
+.errorAlert {
+  padding: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 1rem;
+}
+
+.errorText {
+  color: #dc2626;
+  padding: 1rem;
+  font-size: 1rem;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
-  .pollsHeader,
-  .createPollHeader {
-    padding: 1.5rem;
+  .pollsHeader {
+    padding: 0;
     margin: 1rem;
   }
   
@@ -129,14 +581,83 @@
     flex-direction: column;
     gap: 1.5rem;
     align-items: flex-start;
+    padding: 1.5rem;
   }
   
   .welcomeSection h1 {
     font-size: 1.75rem;
   }
   
-  .createPollBtn {
-    width: 100%;
-    justify-content: center;
+  /* .createPollBtn removed */
+  
+  .listContainer {
+    padding: 0 1rem 1rem 1rem;
+  }
+}
+
+
+/* PollPage.module.css */
+
+/* ... (keep all existing styles) ... */
+
+/* Add new Create Poll Button Styles */
+.createPollBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #22c55e, #16a34a); /* Green gradient */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.3); /* Subtle green shadow */
+  transition: all 0.2s ease;
+  flex-shrink: 0; /* Prevents button from shrinking on small screens */
+}
+
+.createPollBtn:hover {
+  background: linear-gradient(135deg, #16a34a, #0e742a); /* Darker green on hover */
+  box-shadow: 0 6px 10px -2px rgba(34, 197, 94, 0.4);
+}
+
+/* Update headerContent for better alignment with the new button */
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* This is key for side-by-side */
+  padding: 2rem; /* Adjusted from 2rem 0 to 2rem for consistent padding */
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Remove the back button container if it was wrapping the button inside .pollsHeader */
+/* I'll assume you want the back button separate from the header block itself */
+/* Removing .backButtonContainer if it's not needed, and using .createPollHeader for layout */
+
+/* Add a style for the polls header to manage its padding */
+.pollsHeader {
+  margin: 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f1f5f9;
+  padding: 0 2rem; /* Add padding here so children don't rely on padding 0 */
+}
+
+/* Adjust the media query for the header if needed */
+@media (max-width: 768px) {
+  .pollsHeader {
+    padding: 0;
+    margin: 1rem;
+  }
+  
+  .headerContent {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: flex-start;
+    padding: 1.5rem;
   }
 }

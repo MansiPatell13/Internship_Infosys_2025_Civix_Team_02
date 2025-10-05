@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import './dashboard.css';
 import { FaUserCircle, FaHome } from "react-icons/fa";
@@ -95,16 +94,38 @@ function Dashboard() {
     );
   };
 
-  // Fetch user data
+  // ✅ Fetch user data - triggers on token change (user login/logout)
   useEffect(() => {
+    const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
-    if (storedUser) setUser(JSON.parse(storedUser));
+    
+    // Clear previous data immediately when token changes
+    setPetitions([]);
+    setPolls([]);
+    setFilteredPetitions([]);
+    setFilteredPolls([]);
+    setUserStats({
+      totalActivePetitions: 0,
+      myPetitions: 0,
+      totalActivePolls: 0
+    });
+    
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (e) {
+        console.error("Error parsing stored user:", e);
+      }
+    }
     
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem("token");
+        setLoading(true);
+        
         if (!token) {
           setLoading(false);
+          navigate('/login');
           return;
         }
         
@@ -113,7 +134,9 @@ function Dashboard() {
           headers: { 
             "Content-Type": "application/json", 
             Authorization: `Bearer ${token}`, 
-            "Cache-Control": "no-cache" 
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
           },
         });
         
@@ -129,6 +152,7 @@ function Dashboard() {
             name: data.user.name,
             email: data.user.email,
             location: data.user.location || "Unknown",
+            role: data.user.role || data.user.userType,
           };
           setUser(userData);
           localStorage.setItem("user", JSON.stringify(userData));
@@ -142,16 +166,20 @@ function Dashboard() {
     };
     
     fetchUserData();
-  }, [activeView]);
+  }, []); // Only run once on mount
 
-  // Fetch ALL petitions and calculate stats
+  // ✅ Fetch ALL petitions - triggers on user change
   useEffect(() => {
+    const { userId } = getUserInfo();
+    
     const fetchPetitions = async () => {
       try {
         const token = localStorage.getItem("token");
         const response = await fetch('http://localhost:4000/api/petitions', { 
           headers: {
-            "Cache-Control": "no-cache",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
             ...(token ? { Authorization: `Bearer ${token}` } : {})
           }
         });
@@ -174,7 +202,6 @@ function Dashboard() {
           signatures: p.signatures || []
         }));
         
-        // Filter active petitions from ALL users
         const activePetitions = normalizedPetitions.filter(p => 
           p.status === 'active' || 
           p.status === 'under-review' || 
@@ -182,13 +209,11 @@ function Dashboard() {
           p.status === 'pending'
         );
         
-        // Count user's own petitions
         const userPetitions = normalizedPetitions.filter(p => isUserOwnPetition(p));
         
         console.log("Total active petitions:", activePetitions.length);
         console.log("User petitions count:", userPetitions.length);
         
-        // Set ALL active petitions for display (not just user's)
         setPetitions(activePetitions);
         
         setUserStats(prev => ({
@@ -203,11 +228,15 @@ function Dashboard() {
       }
     };
     
-    fetchPetitions();
-  }, [activeView]);
+    if (userId) {
+      fetchPetitions();
+    }
+  }, [user.email, user.id, activeView]); // ✅ Re-fetch when user changes
 
-  // Fetch ALL polls and calculate stats
+  // ✅ Fetch ALL polls - triggers on user change
   useEffect(() => {
+    const { userId } = getUserInfo();
+    
     const fetchPolls = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -217,7 +246,9 @@ function Dashboard() {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
-            "Cache-Control": "no-cache"
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
           },
         });
         
@@ -227,7 +258,6 @@ function Dashboard() {
         const fetchedPolls = data.polls || data;
         console.log("Fetched polls data:", fetchedPolls);
         
-        // Filter active polls from ALL users
         const today = new Date();
         const activePolls = fetchedPolls.filter(poll => {
           if (!poll.closesOn) return true;
@@ -235,9 +265,8 @@ function Dashboard() {
           return closesDate >= today;
         });
         
-        const { userId, userObject } = getUserInfo();
+        const { userObject } = getUserInfo();
         
-        // Count user's polls
         const userPolls = fetchedPolls.filter(p => {
           let creatorId;
           if (typeof p.createdBy === "object" && p.createdBy !== null) {
@@ -251,7 +280,6 @@ function Dashboard() {
         console.log("Total active polls:", activePolls.length);
         console.log("User polls count:", userPolls.length);
         
-        // Set ALL active polls for display (not just user's)
         setPolls(activePolls);
         
         setUserStats(prev => ({
@@ -265,8 +293,10 @@ function Dashboard() {
       }
     };
     
-    fetchPolls();
-  }, [activeView]);
+    if (userId) {
+      fetchPolls();
+    }
+  }, [user.email, user.id, activeView]); // ✅ Re-fetch when user changes
 
   // Filter petitions and polls
   useEffect(() => {
@@ -293,9 +323,23 @@ function Dashboard() {
   }, [locationFilter, categoryFilter, petitions, polls]);
 
   const handleLogout = () => {
+    // ✅ Clear all data before logout
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("userId");
+    
+    // Clear state
+    setUser({ name: "", email: "", location: "" });
+    setPetitions([]);
+    setPolls([]);
+    setFilteredPetitions([]);
+    setFilteredPolls([]);
+    setUserStats({
+      totalActivePetitions: 0,
+      myPetitions: 0,
+      totalActivePolls: 0
+    });
+    
     navigate('/login');
   };
 
@@ -358,8 +402,8 @@ function Dashboard() {
       <Navbar user={user} handleLogout={handleLogout} scrollToFooter={scrollToFooter} />
 
       <div className="main-content">
-        {/* Left Panel */}
-        <div className="left-panel" style={{
+        {/* Left Panel - Fixed Sidebar */}
+        <div className="left-panel left-panel-fixed" style={{
           width: activeView === "dashboard" ? '280px' : '240px',
           minWidth: activeView === "dashboard" ? '280px' : '240px',
           transition: 'width 0.3s ease, min-width 0.3s ease'
