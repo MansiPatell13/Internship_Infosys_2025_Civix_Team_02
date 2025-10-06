@@ -742,3 +742,198 @@ body, html {
   transform: translateY(-30px);
   transition: opacity 300ms ease, transform 300ms ease;
 }
+/* 1. Ensure the overall dashboard spans the full height */
+.dash {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* 2. Main content area: Flex layout for sidebar and panel */
+.main-content {
+    display: flex;
+    flex: 1; /* Take up all available vertical space */
+}
+
+/* 3. Left Panel (Fixed Sidebar) */
+.left-panel-fixed {
+    /* Set a fixed width */
+    width: 280px; 
+    min-width: 280px;
+    
+    /* KEY: Make it stick to the viewport */
+    position: sticky; 
+    top: 0; 
+    
+    /* Maximize height and enable internal scrolling if content is too long */
+    height: 100vh;
+    overflow-y: auto; 
+    
+    /* Other existing styles (padding, shadow, background) */
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+    background-color: #f7f7f7; 
+    z-index: 10;
+}
+
+/* 4. Right Panel (Scrollable Content) */
+.right-panel {
+    flex: 1; /* Take up the rest of the horizontal space */
+    padding: 20px; 
+    
+    /* KEY: Make this panel the only one that scrolls vertically */
+    overflow-y: auto; 
+    max-height: 100vh;
+}
+
+/* You might need to adjust the height properties if your Navbar or Footer 
+   are absolutely or fixed positioned and cover parts of the viewport. */
+   :root {
+  --primary-color: #22c55e;
+  --primary-light: #16a34a;
+  --background-color: #f0fdf4;
+  --card-bg: #ffffff;
+  --text-color: #1e293b;
+  --secondary-text-color: #64748b;
+  --border-radius: 16px;
+  --box-shadow-light: 0 10px 25px rgba(0, 0, 0, 0.08), 0 5px 10px rgba(0, 0, 0, 0.04);
+  --box-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.12), 0 6px 15px rgba(0, 0, 0, 0.06);
+}
+
+body, html {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  /* KEY: Set height to 100% to allow flex container to take full height */
+  height: 100%;
+}
+
+.dash {
+  display: flex;
+  flex-direction: column;
+  /* KEY: Use 100% height from html/body */
+  height: 100%; 
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f8fafc 100%);
+  width: 100%;
+  overflow-x: hidden;
+  /* KEY: Remove min-height: 100vh and use height: 100% if no header/footer is outside main-container */
+}
+
+/* Main Container - Fixed width constraint */
+.main-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  overflow: hidden;
+  flex: 1; /* Allows it to take up space in the .dash flex container */
+  display: flex; /* Makes the main-container a flex parent */
+  flex-direction: column;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  padding: 2rem 0;
+  gap: 2rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* KEY: Hide main-content scrollbar, its children will manage it */
+  position: relative;
+}
+
+/* --- Left Panel - Fixed/Sticky Sidebar --- */
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 280px;
+  min-width: 280px;
+  flex-shrink: 0;
+  /* KEY: This panel is now a container for the sticky part */
+  height: auto; 
+}
+
+/* ✅ Make left panel sticky - MODIFIED */
+.left-panel-fixed {
+  /* This is the correct way to make it sticky within the scrollable parent */
+  position: sticky;
+  top: 2rem;
+  align-self: flex-start;
+  max-height: calc(100vh - 4rem); /* Space for 2rem top and bottom */
+  overflow-y: auto; /* Internal scrolling for sidebar content */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) transparent;
+}
+/* ... rest of the .left-panel-fixed scrollbar styles remain ... */
+.left-panel-fixed::-webkit-scrollbar {
+  width: 6px;
+}
+.left-panel-fixed::-webkit-scrollbar-track {
+  background: transparent;
+}
+.left-panel-fixed::-webkit-scrollbar-thumb {
+  background-color: var(--primary-color);
+  border-radius: 3px;
+}
+
+
+/* --- Right Panel - Flexible width - KEY MODIFICATION --- */
+.right-panel {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  overflow-y: auto; /* KEY: Make the right panel the scrollable area */
+  /* Remove max-height and overflow-y from html/body */
+  height: calc(100vh - 4rem); /* KEY: Calculate full viewport height minus main-content top/bottom padding */
+  padding-right: 1rem; /* Add padding to the right for the scrollbar */
+}
+
+
+.main-container .main-content {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Ensure body is scrollable if content overflows (optional, but good practice) */
+body {
+    overflow-y: auto;
+}
+
+
+/* --- Responsive Design --- */
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+    padding: 1rem 0;
+    overflow: visible; /* Restore default overflow */
+  }
+  
+
+  .left-panel-fixed {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+  
+  .left-panel {
+    width: 100%;
+    min-width: unset;
+    flex-direction: row;
+    gap: 1rem;
+  }
+  
+
+  .right-panel {
+    height: auto; 
+    padding-right: 0; 
+  }
+
+}

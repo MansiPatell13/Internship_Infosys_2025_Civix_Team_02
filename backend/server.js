@@ -9,6 +9,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { connectDB } from "./src/config/db.js";
 
+// Import middleware
+import { requireAuth } from "./src/middleware/auth.js";
+
 // Routes
 import authRoutes from "./src/routes/auth.routes.js";
 import dashboardRoutes from "./src/routes/dashboard.routes.js";
@@ -38,12 +41,12 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/petitions", petitionRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-app.use("/api/auth", forgotPasswordRoutes);
+app.use("/api/auth/password", forgotPasswordRoutes); // Changed to be under auth
 app.use("/api/polls", pollRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/official", officialRoutes);
-app.use("/api/user/settings", settingsRoutes);
+app.use("/api/user/settings", requireAuth, settingsRoutes); // Added requireAuth middleware
 
 // Health check route
 app.get("/", (req, res) => res.json({ ok: true, service: "Civix Backend" }));
