@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../Landing/Navbar";
@@ -13,7 +12,11 @@ const PetitionDetails = () => {
   const [role, setRole] = useState(null);
   const [user, setUser] = useState(null);
 
-  // Fetch petition + user info
+  // Popup modal state
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [responseText, setResponseText] = useState("");
+
   useEffect(() => {
     const fetchPetition = async () => {
       try {
@@ -33,7 +36,7 @@ const PetitionDetails = () => {
         setUser(parsedUser);
         setRole(parsedUser.role);
       } catch (parseError) {
-        console.error("Error parsing user from localStorage:", parseError);
+        console.error("Error parsing user:", parseError);
       }
     }
 
@@ -47,12 +50,12 @@ const PetitionDetails = () => {
     100
   );
 
-  // Sign petition
+  // Citizen sign
   const handleSign = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("You must be logged in to sign a petition.");
+        alert("Please log in to sign the petition.");
         return;
       }
 
@@ -65,12 +68,8 @@ const PetitionDetails = () => {
         body: JSON.stringify({ userId: user._id }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to sign petition");
-      }
+      if (!res.ok) throw new Error("Failed to sign petition");
 
-      const data = await res.json();
       setPetition((prev) => ({
         ...prev,
         signatures: [...prev.signatures, user._id],
@@ -81,12 +80,23 @@ const PetitionDetails = () => {
     }
   };
 
-  // Update petition status
-  const updateStatus = async (newStatus) => {
+  // Open modal before status update
+  const openStatusPopup = (status) => {
+    setSelectedStatus(status);
+    setShowPopup(true);
+  };
+
+  // Confirm update
+  const confirmStatusChange = async () => {
+    if (!responseText.trim()) {
+      alert("Please provide a response before submitting.");
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("You must be logged in as official to update petition status.");
+        alert("Login required to update petition.");
         return;
       }
 
@@ -96,15 +106,27 @@ const PetitionDetails = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({
+          status: selectedStatus,
+          officialResponse: responseText,
+        }),
       });
 
-      if (!res.ok) throw new Error("Failed to update petition status");
+      if (!res.ok) throw new Error("Failed to update status");
       const updated = await res.json();
-      setPetition(updated);
+
+      // fallback if backend doesn't save officialResponse
+      setPetition({
+        ...updated,
+        officialResponse: responseText,
+      });
+
+      setShowPopup(false);
+      setResponseText("");
+      setSelectedStatus("");
     } catch (err) {
       console.error(err);
-      alert("Error updating petition status: " + err.message);
+      alert("Error updating status: " + err.message);
     }
   };
 
@@ -122,9 +144,7 @@ const PetitionDetails = () => {
               src={`http://localhost:4000/api/petitions/image/${petition.image}`}
               alt="Petition"
               className={styles.cardImage}
-              onError={(e) => {
-                e.target.style.display = "none";
-              }}
+              onError={(e) => (e.target.style.display = "none")}
             />
           )}
 
@@ -137,6 +157,15 @@ const PetitionDetails = () => {
               <strong>Location:</strong> {petition.location}
             </p>
             <p className={styles.description}>{petition.description}</p>
+
+            {/* 🟢 Show official response */}
+            {petition.officialResponse && (
+              <div className={styles.responseBox}>
+                <h4>Official Response:</h4>
+                <p>{petition.officialResponse}</p>
+              </div>
+            )}
+
             <p className={styles.signatureInfo}>
               <strong className={styles.signatures}>
                 {petition.signatures?.length || 0}
@@ -167,28 +196,26 @@ const PetitionDetails = () => {
             </div>
 
             <div className={styles.buttonGroup}>
-              {/* Citizen + User actions */}
-             {/* Citizen + User actions */}
-{(role === "user" || role === "citizen") && (
-  petition.signatures?.includes(user._id) ? (
-    <button
-      className={styles.signButton}
-      disabled
-      style={{ opacity: 0.5, cursor: "not-allowed" }}
-    >
-      Already Signed
-    </button>
-  ) : (
-    <button
-      className={styles.signButton}
-      onClick={handleSign}
-      disabled={petition.status === "closed"}
-    >
-      Sign Petition
-    </button>
-  )
-)}
-
+              {/* Citizen actions */}
+              {(role === "user" || role === "citizen") && (
+                petition.signatures?.includes(user._id) ? (
+                  <button
+                    className={styles.signButton}
+                    disabled
+                    style={{ opacity: 0.5 }}
+                  >
+                    Already Signed
+                  </button>
+                ) : (
+                  <button
+                    className={styles.signButton}
+                    onClick={handleSign}
+                    disabled={petition.status === "closed"}
+                  >
+                    Sign Petition
+                  </button>
+                )
+              )}
 
               {/* Official actions */}
               {role === "official" && (
@@ -197,53 +224,23 @@ const PetitionDetails = () => {
                     petition.status === "under-review" ||
                     petition.status === "pending") && (
                     <>
-                      {/* Set Under Review */}
                       <button
                         className={styles.reviewButton}
-                        onClick={() => updateStatus("under-review")}
+                        onClick={() => openStatusPopup("under-review")}
                         disabled={
                           petition.status === "under-review" ||
                           petition.status === "pending"
                         }
-                        style={{
-                          opacity:
-                            petition.status === "under-review" ||
-                            petition.status === "pending"
-                              ? 0.6
-                              : 1,
-                          cursor:
-                            petition.status === "under-review" ||
-                            petition.status === "pending"
-                              ? "not-allowed"
-                              : "pointer",
-                        }}
                       >
-                        {petition.status === "under-review" ||
-                        petition.status === "pending"
+                        {petition.status === "under-review"
                           ? "Under Review"
                           : "Set Under Review"}
                       </button>
 
-                      {/* Close */}
                       <button
                         className={styles.closeButton}
-                        onClick={() => updateStatus("closed")}
-                        disabled={
-                          petition.status === "closed" ||
-                          petition.status === "resolved"
-                        }
-                        style={{
-                          opacity:
-                            petition.status === "closed" ||
-                            petition.status === "resolved"
-                              ? 0.6
-                              : 1,
-                          cursor:
-                            petition.status === "closed" ||
-                            petition.status === "resolved"
-                              ? "not-allowed"
-                              : "pointer",
-                        }}
+                        onClick={() => openStatusPopup("closed")}
+                        disabled={petition.status === "closed"}
                       >
                         Close
                       </button>
@@ -252,37 +249,52 @@ const PetitionDetails = () => {
 
                   {(petition.status === "closed" ||
                     petition.status === "resolved") && (
-                    <>
-                      {/* Reopen */}
-                      <button
-                        className={styles.successBtn}
-                        onClick={() => updateStatus("active")}
-                      >
-                        Reopen
-                      </button>
-
-                      {/* Close disabled */}
-                      <button
-                        className={styles.closeButton}
-                        disabled
-                        style={{ opacity: 0.6, cursor: "not-allowed" }}
-                      >
-                        Close
-                      </button>
-                    </>
+                    <button
+                      className={styles.successBtn}
+                      onClick={() => openStatusPopup("active")}
+                    >
+                      Reopen
+                    </button>
                   )}
                 </div>
               )}
-
-              {/* {!role && (
-                <p style={{ color: "red", fontSize: "14px" }}>
-                  No role detected. Please log in.
-                </p>
-              )} */}
             </div>
           </div>
         </div>
       </div>
+
+      {/* 🟢 Popup Modal */}
+      {showPopup && (
+        <div className={styles.popupOverlay}>
+          <div className={styles.popupBox}>
+            <h3>
+              {selectedStatus === "under-review"
+                ? "Set Petition Under Review"
+                : selectedStatus === "closed"
+                ? "Close Petition"
+                : "Reopen Petition"}
+            </h3>
+            <textarea
+              className={styles.textarea}
+              placeholder="Enter reason or official response..."
+              value={responseText}
+              onChange={(e) => setResponseText(e.target.value)}
+            />
+            <div className={styles.popupActions}>
+              <button className={styles.submitBtn} onClick={confirmStatusChange}>
+                Submit
+              </button>
+              <button
+                className={styles.cancelBtn}
+                onClick={() => setShowPopup(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
