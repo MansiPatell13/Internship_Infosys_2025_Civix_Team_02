@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../Landing/Footer";
 import Navbar from "../Landing/Navbar";
 import styles from "./PetitionHead.module.css";
+import OfficialStatusDropdown from "./OfficialStatusDropDown";
 
 const PetitionHead = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const PetitionHead = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [category, setCategory] = useState("All Categories");
   const [currentPage, setCurrentPage] = useState(1);
-  const [petitionsPerPage] = useState(8);
+  const [petitionsPerPage] = useState(9);
   const [popup, setPopup] = useState("");
 
   const decodeToken = (token) => {
@@ -181,36 +182,41 @@ const PetitionHead = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleStatusUpdate = async (petitionId, newStatus) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setPopup("You must be logged in to update petition status.");
-        return;
-      }
-      const res = await fetch(
-        `http://localhost:4000/api/petitions/${petitionId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ status: newStatus }),
-        }
-      );
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to update petition status");
-      }
-
-      setPopup(`Petition status updated to ${newStatus}!`);
-      await fetchPetitions();
-    } catch (error) {
-      setPopup("Error updating petition status: " + error.message);
+  const handleStatusUpdate = async (petitionId, newStatus, responseText) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setPopup("You must be logged in to update petition status.");
+      return;
     }
-  };
+
+    const res = await fetch(`http://localhost:4000/api/petitions/${petitionId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        status: newStatus,
+        officialResponse: responseText, // optional field
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || "Failed to update petition status");
+    }
+
+    setPopup(`Petition status updated to ${newStatus}!`);
+
+    // Delay refetch to avoid flicker
+    setTimeout(fetchPetitions, 400);
+
+  } catch (error) {
+    setPopup("Error updating petition status: " + error.message);
+  }
+};
+
 
   const handleSign = async (id) => {
     try {
@@ -612,73 +618,43 @@ const PetitionHead = () => {
                             >
                               View Details
                             </button>
-
-                            {isOfficial ? (
-                              <div className={styles.officialActions}>
-                                <button
-                                  className={`${styles.actionBtn} ${styles.warningBtn}`}
-                                  onClick={() => handleStatusUpdate(petition._id, "under-review")}
-                                  disabled={petition.status === "under-review" || petition.status === "pending"}
-                                  style={{
-                                    opacity: (petition.status === "under-review" || petition.status === "pending") ? 0.6 : 1,
-                                    cursor: (petition.status === "under-review" || petition.status === "pending") ? "not-allowed" : "pointer"
-                                  }}
-                                >
-                                  {(petition.status === "under-review" || petition.status === "pending")
-                                    ? "Under Review"
-                                    : "Set Under Review"}
-                                </button>
-
-                                <button
-                                  className={`${styles.actionBtn} ${styles.secondaryBtn}`}
-                                  onClick={() => handleStatusUpdate(petition._id, "closed")}
-                                  disabled={petition.status === "closed" || petition.status === "resolved"}
-                                  style={{
-                                    opacity: (petition.status === "closed" || petition.status === "resolved") ? 0.6 : 1,
-                                    cursor: (petition.status === "closed" || petition.status === "resolved") ? "not-allowed" : "pointer"
-                                  }}
-                                >
-                                  {(petition.status === "closed" || petition.status === "resolved")
-                                    ? "Closed"
-                                    : "Close"}
-                                </button>
-
-                                {(petition.status === "closed" || petition.status === "resolved") && (
-                                  <button
-                                    className={`${styles.actionBtn} ${styles.successBtn}`}
-                                    onClick={() => handleStatusUpdate(petition._id, "active")}
-                                  >
-                                    Reopen
-                                  </button>
-                                )}
-                              </div>
-                            ) : (
-                              <div className={styles.userActions}>
-                                {!isUserOwnPetition(petition) && (
-                                  <button
-                                    className={`${styles.actionBtn} ${
-                                      isUserSignedPetition(petition)
-                                        ? styles.signedBtn
-                                        : styles.signBtn
-                                    }`}
-                                    disabled={
-                                      petition?.status === "closed" ||
-                                      isUserSignedPetition(petition)
-                                    }
-                                    onClick={() => handleSign(petition._id)}
-                                  >
-                                    {isUserSignedPetition(petition)
-                                      ? "Already Signed"
-                                      : "Sign Petition"}
-                                  </button>
-                                )}
-                                {isUserOwnPetition(petition) && (
-                                  <button className={styles.ownerBtn}>
-                                    Created By You
-                                  </button>
-                                )}
-                              </div>
-                            )}
+{isOfficial ? (
+  <div className={styles.officialActions}>
+    {/* Officials can only view details now */}
+    {/* <button
+      className={styles.detailsBtn}
+      onClick={() => navigate(`/petition/${petition._id}`)}
+    >
+      View Details
+    </button> */}
+  </div>
+) : (
+  <div className={styles.userActions}>
+    {!isUserOwnPetition(petition) && (
+      <button
+        className={`${styles.actionBtn} ${
+          isUserSignedPetition(petition)
+            ? styles.signedBtn
+            : styles.signBtn
+        }`}
+        disabled={
+          petition?.status === "closed" ||
+          isUserSignedPetition(petition)
+        }
+        onClick={() => handleSign(petition._id)}
+      >
+        {isUserSignedPetition(petition)
+          ? "Already Signed"
+          : "Sign Petition"}
+      </button>
+    )}
+    {isUserOwnPetition(petition) && (
+      <button className={styles.ownerBtn}>
+        Created By You
+      </button>
+    )}
+  </div>
+)}
                           </div>
                         </div>
                       </div>
