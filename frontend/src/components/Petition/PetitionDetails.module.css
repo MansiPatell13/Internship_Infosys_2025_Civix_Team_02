@@ -531,3 +531,541 @@
   margin: 10px 0;
   font-style: italic;
 }
+
+/* Add these styles to your existing PetitionDetails.module.css */
+
+/* Enhanced Popup Overlay */
+.popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Enhanced Popup Box */
+.popupBox {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 550px;
+  width: 90%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+              0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease;
+  position: relative;
+  border: 1px solid #e5e7eb;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Popup Header */
+.popupBox h3 {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+  position: relative;
+  padding-bottom: 16px;
+}
+
+.popupBox h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #2e7d32, #4caf50);
+  border-radius: 2px;
+}
+
+/* Enhanced Textarea */
+.textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 16px;
+  font-size: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  color: #374151;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  resize: vertical;
+  transition: all 0.3s ease;
+  outline: none;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 8px;
+}
+
+.textarea:focus {
+  background: #ffffff;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1),
+              inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.textarea::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Popup Actions */
+.popupActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: center;
+}
+
+/* Base Button Styles */
+.popupActions button {
+  flex: 1;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.popupActions button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.popupActions button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Submit Button */
+.submitBtn {
+  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 6px rgba(46, 125, 50, 0.3);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+  box-shadow: 0 6px 12px rgba(46, 125, 50, 0.4);
+  transform: translateY(-2px);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(46, 125, 50, 0.3);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Cancel Button */
+.cancelBtn {
+  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 6px rgba(107, 114, 128, 0.3);
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+  box-shadow: 0 6px 12px rgba(107, 114, 128, 0.4);
+  transform: translateY(-2px);
+}
+
+.cancelBtn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
+}
+
+.cancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Character Counter */
+.characterCounter {
+  text-align: right;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Spinner for Loading State */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .popupBox {
+    padding: 24px;
+    width: 95%;
+    max-width: none;
+  }
+
+  .popupBox h3 {
+    font-size: 20px;
+  }
+
+  .textarea {
+    min-height: 120px;
+    font-size: 14px;
+  }
+
+  .popupActions {
+    flex-direction: column;
+  }
+
+  .popupActions button {
+    width: 100%;
+  }
+}
+
+/* Status Badge Enhancement */
+.responseBox {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-left: 4px solid #22c55e;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
+}
+
+.responseBox h4 {
+  margin: 0 0 12px 0;
+  color: #166534;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.responseBox h4::before {
+  content: '📢';
+  font-size: 20px;
+}
+
+.responseBox p {
+  margin: 0;
+  color: #166534;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* Official Activities Section */
+.activitiesSection {
+  margin: 30px 0;
+  padding: 25px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border-left: 4px solid #3b82f6;
+}
+
+.activitiesTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.activityIcon {
+  font-size: 1.8rem;
+}
+
+.activitiesList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.activityCard {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.activityCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.activityHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.officialInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.officialBadge {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.officialName {
+  font-weight: 600;
+  color: #334155;
+  font-size: 1.05rem;
+}
+
+.activityStatus {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
+  text-transform: capitalize;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.activityBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.activityResponse {
+  color: #475569;
+  line-height: 1.6;
+  font-size: 1rem;
+  margin: 0;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+}
+
+.activityTime {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.activityTime::before {
+  content: "🕒";
+  font-size: 1rem;
+}
+
+/* Response Box (fallback) */
+.responseBox {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  border-left: 4px solid #f59e0b;
+}
+
+.responseBox h4 {
+  color: #92400e;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.responseBox p {
+  color: #78350f;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Popup Improvements */
+.popupSubtext {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  font-style: italic;
+}
+
+.charCounter {
+  text-align: right;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-top: 8px;
+  margin-bottom: 15px;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.popupActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.submitBtn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  background: #e5e7eb;
+  color: #374151;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: #d1d5db;
+}
+
+.cancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .activitiesSection {
+    padding: 20px 15px;
+  }
+
+  .activitiesTitle {
+    font-size: 1.3rem;
+  }
+
+  .activityCard {
+    padding: 15px;
+  }
+
+  .activityHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .officialInfo {
+    flex-wrap: wrap;
+  }
+
+  .activityStatus {
+    align-self: flex-start;
+  }
+
+  .popupActions {
+    flex-direction: column;
+  }
+
+  .submitBtn,
+  .cancelBtn {
+    width: 100%;
+  }
+}

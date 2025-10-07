@@ -4,8 +4,9 @@ import Navbar from "../Landing/Navbar";
 import Footer from "../Landing/Footer";
 import styles from "./PetitionDetails.module.css";
 
-const PetitionDetails = () => {
-  const { id } = useParams();
+const PetitionDetails = ({ isInDashboard, petitionId, onBack }) => {
+  const { id: urlId } = useParams();
+  const id = isInDashboard ? petitionId : urlId;
   const navigate = useNavigate();
 
   const [petition, setPetition] = useState(null);
@@ -40,7 +41,9 @@ const PetitionDetails = () => {
       }
     }
 
-    fetchPetition();
+    if (id) {
+      fetchPetition();
+    }
   }, [id]);
 
   if (!petition) return <p className="text-center mt-5">Loading petition...</p>;
@@ -49,36 +52,6 @@ const PetitionDetails = () => {
     ((petition.signatures?.length || 0) / (petition.signatureGoal || 1)) * 100,
     100
   );
-
-  // Citizen sign
-  const handleSign = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Please log in to sign the petition.");
-        return;
-      }
-
-      const res = await fetch(`http://localhost:4000/api/petitions/${id}/sign`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ userId: user._id }),
-      });
-
-      if (!res.ok) throw new Error("Failed to sign petition");
-
-      setPetition((prev) => ({
-        ...prev,
-        signatures: [...prev.signatures, user._id],
-      }));
-    } catch (err) {
-      console.error(err);
-      alert("Error signing petition: " + err.message);
-    }
-  };
 
   // Open modal before status update
   const openStatusPopup = (status) => {
@@ -130,14 +103,22 @@ const PetitionDetails = () => {
     }
   };
 
+  // Handle back button click
+  const handleBackClick = () => {
+    if (isInDashboard && onBack) {
+      onBack();
+    } else {
+      navigate(-1);
+    }
+  };
+
   return (
     <div className={styles.lu}>
-      <Navbar />
+      {!isInDashboard && <Navbar />}
       <div className={styles.container}>
         <button className={styles.backButton} onClick={() => navigate(-1)}>
-          ← Back
-        </button>
-
+           ← Back
+      </button>
         <div className={styles.card}>
           {petition.image && (
             <img
@@ -158,7 +139,7 @@ const PetitionDetails = () => {
             </p>
             <p className={styles.description}>{petition.description}</p>
 
-            {/* 🟢 Show official response */}
+            {/* Official response */}
             {petition.officialResponse && (
               <div className={styles.responseBox}>
                 <h4>Official Response:</h4>
@@ -195,29 +176,8 @@ const PetitionDetails = () => {
               ></div>
             </div>
 
+            {/* Only show official actions */}
             <div className={styles.buttonGroup}>
-              {/* Citizen actions */}
-              {(role === "user" || role === "citizen") && (
-                petition.signatures?.includes(user._id) ? (
-                  <button
-                    className={styles.signButton}
-                    disabled
-                    style={{ opacity: 0.5 }}
-                  >
-                    Already Signed
-                  </button>
-                ) : (
-                  <button
-                    className={styles.signButton}
-                    onClick={handleSign}
-                    disabled={petition.status === "closed"}
-                  >
-                    Sign Petition
-                  </button>
-                )
-              )}
-
-              {/* Official actions */}
               {role === "official" && (
                 <div className={styles.officialActions}>
                   {(petition.status === "active" ||
@@ -247,8 +207,7 @@ const PetitionDetails = () => {
                     </>
                   )}
 
-                  {(petition.status === "closed" ||
-                    petition.status === "resolved") && (
+                  {(petition.status === "closed" || petition.status === "resolved") && (
                     <button
                       className={styles.successBtn}
                       onClick={() => openStatusPopup("active")}
@@ -263,7 +222,7 @@ const PetitionDetails = () => {
         </div>
       </div>
 
-      {/* 🟢 Popup Modal */}
+      {/* Popup Modal */}
       {showPopup && (
         <div className={styles.popupOverlay}>
           <div className={styles.popupBox}>
@@ -295,7 +254,7 @@ const PetitionDetails = () => {
         </div>
       )}
 
-      <Footer />
+      {!isInDashboard && <Footer />}
     </div>
   );
 };

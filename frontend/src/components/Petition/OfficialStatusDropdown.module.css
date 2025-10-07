@@ -75,3 +75,328 @@
   border: none;
   cursor: pointer;
 }
+
+/* Dropdown Wrapper */
+.dropdownWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Dropdown Select */
+.dropdown {
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dropdown:hover {
+  border-color: #2e7d32;
+  background: #ffffff;
+  box-shadow: 0 4px 6px rgba(46, 125, 50, 0.1);
+}
+
+.dropdown:focus {
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+/* Popup Overlay with Animation */
+.popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Popup Box with Enhanced Styling */
+.popupBox {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+              0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease;
+  position: relative;
+  border: 1px solid #e5e7eb;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Popup Header */
+.popupBox h3 {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+  position: relative;
+  padding-bottom: 16px;
+}
+
+.popupBox h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #2e7d32, #4caf50);
+  border-radius: 2px;
+}
+
+/* Textarea with Enhanced Styling */
+.textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 16px;
+  font-size: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  color: #374151;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  resize: vertical;
+  transition: all 0.3s ease;
+  outline: none;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.textarea:focus {
+  background: #ffffff;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1),
+              inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.textarea::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Action Buttons Container */
+.popupActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: center;
+}
+
+/* Base Button Styles */
+.popupActions button {
+  flex: 1;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.popupActions button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.popupActions button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Submit Button */
+.submitBtn {
+  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 6px rgba(46, 125, 50, 0.3);
+}
+
+.submitBtn:hover {
+  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+  box-shadow: 0 6px 12px rgba(46, 125, 50, 0.4);
+  transform: translateY(-2px);
+}
+
+.submitBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(46, 125, 50, 0.3);
+}
+
+/* Cancel Button */
+.cancelBtn {
+  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 6px rgba(107, 114, 128, 0.3);
+}
+
+.cancelBtn:hover {
+  background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+  box-shadow: 0 6px 12px rgba(107, 114, 128, 0.4);
+  transform: translateY(-2px);
+}
+
+.cancelBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
+}
+
+/* Disabled State */
+.dropdown:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .popupBox {
+    padding: 24px;
+    width: 95%;
+    max-width: none;
+  }
+
+  .popupBox h3 {
+    font-size: 20px;
+  }
+
+  .textarea {
+    min-height: 120px;
+    font-size: 14px;
+  }
+
+  .popupActions {
+    flex-direction: column;
+  }
+
+  .popupActions button {
+    width: 100%;
+  }
+}
+
+/* Loading State */
+.submitBtn:disabled,
+.cancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Spinner for Loading State */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Add a subtle pulse animation to the popup */
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+                0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  50% {
+    box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.15), 
+                0 15px 15px -5px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* Character Counter (Optional Enhancement) */
+.characterCounter {
+  text-align: right;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+/* Success/Error Message Styles (Optional) */
+.message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message.success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.message.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}

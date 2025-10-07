@@ -14,17 +14,27 @@ import PetitionDetails from "./components/Petition/PetitionDetails";
 import PetitionCategory from "./components/Petition/PettionCategory";
 import PetitionPage from "./components/Petition/PetitionPage";
 import PollCreation from './components/NavbarPoll/PollCreation.jsx';
+import PollHead from './components/poll/PollHead.jsx'
 import PollPage from './pages/PollPage.jsx';
+import { AuthProvider } from '../src/components/Auth/AuthContext.jsx';
+import Settings from './components/setting/setting.jsx';
+import ProtectedRoute from './components/ProtectedRoute';
 import ReportDashboard from './components/Reports/ReportsDashboard.jsx';
 function App() {
   
   return (
-
+    <AuthProvider>
+      
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/home" />} /> 
         <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path='/forgot' element={<Forgot/>}/>
@@ -36,10 +46,13 @@ function App() {
         <Route path="/petition" element={<PetitionPage />} />
         <Route path='/pollsfilter' element={<Polls/>}/>
         <Route path='/poll-creation' element={<PollCreation/>}/>
+        <Route path='poll-head' element={<PollHead/>}/>
         <Route path="/polls" element={<PollPage />} />
-         <Route path="/reports" element={<ReportDashboard />} />
+        <Route path="/settings" element={<Settings />} />
+      <Route path="/reports" element={<ReportDashboard />} />
       </Routes>
     </Router>
+    </AuthProvider>
   );
 }
 

@@ -25,7 +25,7 @@ router.get("/", requireAuth, async (req, res) => {
     if (req.user.role === 'official') {
       // For officials, show petitions and polls in their location
       const locationPetitions = await Petition.find({ location: req.user.location })
-        .populate('creator', 'name email')
+        .populate('createdBy', 'name email')
         .sort('-createdAt');
       
       const locationPolls = await Poll.find({ target_location: req.user.location })
@@ -55,7 +55,7 @@ router.get("/", requireAuth, async (req, res) => {
       };
     } else {
       // For citizens, show their own petitions and polls
-      const userPetitions = await Petition.find({ creator: userId }).sort('-createdAt');
+      const userPetitions = await Petition.find({ createdBy: userId }).sort('-createdAt');
       const userPolls = await Poll.find({ createdBy: userId }).sort('-createdAt');
 
       // Active engagements for citizen

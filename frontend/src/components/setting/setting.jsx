@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./settings.css";
 
-// CRITICAL: Using the absolute URL with the backend's port (4000)
 const BASE_URL = "http://localhost:4000/api/user/settings";
 
 function Settings() {
@@ -41,9 +40,6 @@ function Settings() {
     setSuccess(null);
   };
 
-  /**
-   * Universal fetch error handler.
-   */
   const handleFetchError = async (response) => {
     const contentType = response.headers.get("content-type");
 
@@ -54,15 +50,13 @@ function Settings() {
     }
 
     try {
-        const errorData = await response.json();
-        return errorData.message || errorData.errors?.[0]?.msg || `Request failed with status ${response.status}.`;
+      const errorData = await response.json();
+      return errorData.message || errorData.errors?.[0]?.msg || `Request failed with status ${response.status}.`;
     } catch (e) {
-        return `Failed to parse JSON error response (Status: ${response.status}).`;
+      return `Failed to parse JSON error response (Status: ${response.status}).`;
     }
   };
 
-
-  // --- Fetch user profile on mount (GET) ---
   useEffect(() => {
     const fetchProfile = async () => {
       resetMessages();
@@ -75,7 +69,7 @@ function Settings() {
         if (!response.ok) {
           throw new Error(await handleFetchError(response));
         }
-        
+
         const data = await response.json();
         setProfile({
           name: data.name || "",
@@ -99,7 +93,6 @@ function Settings() {
     }
   }, []);
 
-  // --- Handlers for Input Changes ---
   const handleProfileChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
@@ -112,8 +105,6 @@ function Settings() {
     setDeleteForm({ ...deleteForm, password: e.target.value });
   };
 
-
-  // --- Handle Profile Update (PUT) ---
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     resetMessages();
@@ -126,11 +117,11 @@ function Settings() {
         headers,
         body: JSON.stringify(profile),
       });
-      
+
       if (!response.ok) {
         throw new Error(await handleFetchError(response));
       }
-      
+
       const data = await response.json();
 
       setProfile({
@@ -140,11 +131,9 @@ function Settings() {
       });
       setSuccess("Profile updated successfully!");
 
-      // FIX: Force a page reload to update all other components (Header/Dashboard)
       setTimeout(() => {
-        window.location.reload(); 
+        window.location.reload();
       }, 500);
-
     } catch (err) {
       console.error("Profile update failed:", err);
       setError(err.message || "Failed to update profile. Check your input.");
@@ -153,7 +142,6 @@ function Settings() {
     }
   };
 
-  // --- Handle Password Change (PUT /password) ---
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     resetMessages();
@@ -172,17 +160,14 @@ function Settings() {
         throw new Error(await handleFetchError(response));
       }
 
-      await response.json(); 
+      await response.json();
 
       setSuccess("Password changed successfully! Please log in again...");
-      
-      // FIX: Log user out and force redirect to login
+
       localStorage.removeItem("token");
       setTimeout(() => {
-        // Redirect to login page to reset the application state completely
-        window.location.href = "/login"; 
+        window.location.href = "/login";
       }, 500);
-
     } catch (err) {
       console.error("Password change failed:", err);
       setError(err.message || "Failed to change password. Check inputs.");
@@ -191,7 +176,6 @@ function Settings() {
     }
   };
 
-  // --- Handle Account Deletion (DELETE) ---
   const handleDeleteSubmit = async (e) => {
     e.preventDefault();
     resetMessages();
@@ -219,23 +203,16 @@ function Settings() {
 
       setSuccess("Account deleted successfully. Logging out...");
 
-      // *** FIX: Remove token immediately and redirect, 
-      // ensuring the next page load sees the logged-out state. ***
       localStorage.removeItem("token");
-      
-      // Force navigation to the home/login route
-      window.location.href = "/"; 
-      // **********************************************************
 
+      window.location.href = "/login";
     } catch (err) {
       console.error("Account deletion failed:", err);
       setError(err.message || "Failed to delete account. Invalid password or server error.");
-      setLoading(false); // Only clear loading if we are staying on the page due to an error
+      setLoading(false);
     }
-    // Note: No finally block for successful delete, as we redirect immediately.
   };
 
-  // --- Render ---
   return (
     <div className="settings-page">
       <h1 className="account-heading">Account Settings</h1>

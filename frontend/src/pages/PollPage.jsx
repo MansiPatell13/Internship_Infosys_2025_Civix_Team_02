@@ -109,13 +109,13 @@ const PollList = ({ onPollClick, onBack, onCreatePoll }) => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.createPollHeader}>
+{/*       <div className={styles.createPollHeader}>
         <button onClick={onBack} className={styles.backToPollsBtn}>
           <FaArrowLeft /> Back
         </button>
-      </div>
+      </div> */}
 
-      <div className={styles.pollsHeader}> 
+{/*       <div className={styles.pollsHeader}> 
         <div className={styles.headerContent}>
           <div className={styles.titleSection}>
             <h1 className={styles.title}>
@@ -127,12 +127,8 @@ const PollList = ({ onPollClick, onBack, onCreatePoll }) => {
             </p>
           </div>
           
-{/*           NEW: Create Poll button
-          <button onClick={onCreatePoll} className={styles.createPollBtn}>
-            <FaPlus /> Create Poll
-          </button> */}
         </div>
-      </div>
+      </div> */}
 
       <div className={`${styles.content} ${styles.listContainer}`}>
         <div className={styles.tabsAndSearchContainer}>

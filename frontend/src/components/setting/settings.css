@@ -121,13 +121,15 @@
 }
 
 /* Danger form styling */
+/* Remove red styling from danger form */
 .settings-form.danger {
-  background: #fff0f2;
-  border: 2px solid #f44336ad;
+  background: #ffffffe6; /* Same as default */
+  border: none;          /* No red border */
   box-shadow:
-    6px 6px 18px rgba(244, 67, 54, 0.15),
-    -6px -6px 18px rgba(255, 200, 200, 0.8);
+    8px 8px 24px rgba(0, 0, 0, 0.08),
+    -8px -8px 24px rgba(255, 255, 255, 0.9); /* Same as others */
 }
+
 
 /* Delete button */
 .settings-form.danger button.delete-btn {
@@ -140,6 +142,7 @@
   background: linear-gradient(135deg, #d32f2fe0, #b71c1cd6);
   box-shadow: 0 12px 32px rgba(179, 28, 28, 0.7);
 }
+
 
 /* Labels and input width for danger form */
 .settings-form.danger label {
