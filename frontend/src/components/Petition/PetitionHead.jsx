@@ -173,6 +173,11 @@ const PetitionHead = ({ isInDashboard, onViewDetails }) => {
   const filteredPetitions = petitions
     .filter((petition) => petition)
     .filter((petition) => {
+
+      if (category !== "All Categories" && petition.category !== category) {
+        return false;
+      }
+
       if (activeTab === "location") {
         return petition.location === userLocation;
       }
@@ -193,10 +198,6 @@ const PetitionHead = ({ isInDashboard, onViewDetails }) => {
       }
       if (activeTab === "signed") {
         return isUserSignedPetition(petition) && !isUserOwnPetition(petition);
-      }
-
-      if (category !== "All Categories" && petition.category !== category) {
-        return false;
       }
 
       return true;

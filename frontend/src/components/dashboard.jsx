@@ -8,6 +8,8 @@ import { MdOutlinePoll, MdOutlineHelp } from "react-icons/md";
 import { BsGraphUp } from "react-icons/bs";
 import { IoMdSettings, IoMdCreate } from "react-icons/io";
 import { CgLogOut } from "react-icons/cg";
+import { GoListUnordered } from "react-icons/go";
+import { BsBarChartLine } from "react-icons/bs";
 import Navbar from '../components/Landing/Navbar';
 import Footer from '../components/Landing/Footer';
 import PetitionPage from '../components/Petition/PetitionPage';
@@ -591,7 +593,7 @@ function Dashboard() {
                                     color: (activeView === "petition-head" || activeView === "petition-details") ? "var(--primary-color)" : "var(--text-color)"
                                 }}
                             >
-                                <MdOutlinePoll className="icon" /> See all Petition
+                                 <GoListUnordered className="icon" /> See all Petition
                             </a>
                             <a 
                                 href="#" 
@@ -605,7 +607,7 @@ function Dashboard() {
                                     color: activeView === "polls" ? "var(--primary-color)" : "var(--text-color)"
                                 }}
                             >
-                                <MdOutlinePoll className="icon" /> View Poll
+                                 <BsBarChartLine className="icon" /> View Poll
                             </a>
                             <a 
                                 href="#" 

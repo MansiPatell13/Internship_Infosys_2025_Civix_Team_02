@@ -93,9 +93,7 @@
   /* background-color: rgba(40, 167, 69, 0.1); */
 }
 
-.navLink:hover::after {
-  width: 70%;
-}
+
 
 .navLink.active {
   color: #2d5a3d;
@@ -103,9 +101,7 @@
   background-color: rgba(40, 167, 69, 0.15);
 }
 
-.navLink.active::after {
-  width: 70%;
-}
+
 
 /* Buttons and user section */
 .navbarButtonsWrapper {
@@ -271,5 +267,323 @@
   .button {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* Hamburger button styling */
+.hamburger {
+  display: none; /* hidden by default */
+  flex-direction: column;
+  justify-content: space-around;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1100;
+}
+
+.bar, .barActive {
+  width: 24px;
+  height: 3px;
+  background-color: #2d5a3d;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+/* Animate hamburger bars when active (optional) */
+.barActive:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.barActive:nth-child(2) {
+  opacity: 0;
+}
+
+.barActive:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* Hide navbar links wrapper initially on small screens */
+.navbarLinksWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive menu for mobile */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+    margin-top: 30px;
+  }
+
+  .navbarLinksWrapper {
+    flex-direction: column;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: white;
+    position: absolute;
+    top: 70px; /* Adjust based on navbar height */
+    left: 0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-top: 1px solid #ccc;
+  }
+
+  .navbarLinksWrapper.showMenu {
+    max-height: 500px; /* large enough to show all */
+  }
+
+  .navbarLinksList {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .navbarLinkItem {
+    width: 100%;
+    text-align: center;
+  }
+
+  .navLink {
+    display: block;
+    width: 100%;
+    padding: 1rem 0;
+  }
+
+  .navbarButtonsWrapper {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .button {
+    width: 90%;
+    margin: 0 auto;
+    text-align: center;
+  }
+}
+/* General navbar styling omitted for brevity; assume existing styles here */
+
+.navbarContainer {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.navbarContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;  /* for hamburger absolute positioning */
+}
+
+.navbarLogo {
+  font-weight: 800;
+  font-size: 2rem;
+  color: #2d5a3d;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  padding-top: 10px;
+}
+
+.navbarLogo:hover {
+  color: #28a745;
+  transform: translateY(-1px);
+}
+
+.navbarLinksWrapper {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.navbarLinksList {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 2rem;
+}
+
+.navbarLinkItem {
+  position: relative;
+}
+
+.navLink {
+  color: #5a6c57;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.navLink:hover,
+.navLink.active {
+  color: #28a745;
+  border-bottom: 2px solid #28a745;
+}
+
+.navbarButtonsWrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userGreeting {
+  color: #555;
+  font-weight: 700;
+  margin-right: 1rem;
+}
+
+.button {
+  background-color: transparent;
+  border: 2px solid #28a745;
+  color: #28a745;
+  padding: 0.4rem 1rem;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.successButton {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.successButton:hover {
+  background-color: #1f6f2a;
+}
+
+/* Hamburger styles */
+
+.hamburger {
+  display: none; /* hidden by default */
+  flex-direction: column;
+  justify-content: space-around;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1100;
+  position: absolute;
+  right: 15px;  /* Right aligned */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.bar, .barActive {
+  width: 24px;
+  height: 3px;
+  background-color: #2d5a3d;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.barActive:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.barActive:nth-child(2) {
+  opacity: 0;
+}
+
+.barActive:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* Navbar Links responsive */
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .navbarLinksWrapper {
+    flex-direction: column;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: white;
+    position: absolute;
+    top: 70px; /* Adjust based on navbar height */
+    left: 0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-top: 1px solid #ccc;
+    z-index: 1050;
+  }
+
+  .navbarLinksWrapper.showMenu {
+    max-height: 500px; /* large enough to show all */
+  }
+
+  .navbarLinksList {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .navbarLinkItem {
+    width: 100%;
+    text-align: center;
+  }
+
+  .navLink {
+    display: block;
+    width: 100%;
+    padding: 1rem 0;
+  }
+
+  .navbarButtonsWrapper {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    justify-content: flex-end; /* right align Hi user */
+    padding-right: 24px;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .userGreeting {
+    margin-bottom: 0.6rem;
+    margin-right: 0;
+    text-align: right;
+  }
+
+  .button {
+    width: 90%;
+    margin: 0 auto;
+    text-align: center;
   }
 }

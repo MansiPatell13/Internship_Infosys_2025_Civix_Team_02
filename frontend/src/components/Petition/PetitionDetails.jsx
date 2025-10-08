@@ -468,7 +468,6 @@ const PetitionDetails = ({ isInDashboard, petitionId: propPetitionId, onBack }) 
           {/* Official Actions */}
           {canManagePetition && (
             <div className={styles.officialActions}>
-              <h4>Official Actions</h4>
               <div className={styles.actionButtons}>
                 {petition.status !== "closed" && (
                   <button
