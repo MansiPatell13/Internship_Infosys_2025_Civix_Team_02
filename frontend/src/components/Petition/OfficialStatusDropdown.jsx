@@ -1,81 +1,3 @@
-// import React, { useState } from "react";
-// import styles from "./OfficialStatusDropdown.module.css";
-
-// const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) => {
-//   const [selectedStatus, setSelectedStatus] = useState("");
-//   const [showPopup, setShowPopup] = useState(false);
-//   const [responseText, setResponseText] = useState("");
-
-//   const handleSelect = (e) => {
-//     const status = e.target.value;
-//     if (!status) return;
-//     setSelectedStatus(status);
-//     setShowPopup(true);
-//   };
-
-//   const handleSubmit = async () => {
-//     if (!responseText.trim()) {
-//       alert("Please enter a response or reason");
-//       return;
-//     }
-
-//     const statusLabel = `${selectedStatus} (by ${officialName || "Official"})`;
-
-//     // Wait until popup closes to prevent re-render flicker
-//     await handleStatusUpdate(petition._id, statusLabel, responseText);
-//     setShowPopup(false);
-//     setResponseText("");
-//     setSelectedStatus("");
-//   };
-
-//   return (
-//     <div className={styles.dropdownWrapper}>
-//       <select
-//         className={styles.dropdown}
-//         value={selectedStatus}
-//         onChange={handleSelect}
-//       >
-//         <option value="">Change Status</option>
-//         <option value="under-review">Set Under Review</option>
-//         <option value="closed">Close Petition</option>
-//         <option value="active">Reopen Petition</option>
-//       </select>
-
-//       {showPopup && (
-//         <div className={styles.popupOverlay}>
-//           <div className={styles.popupBox}>
-//             <h3>Provide Reason / Response</h3>
-//             <textarea
-//               className={styles.textarea}
-//               placeholder="Enter reason or notes..."
-//               value={responseText}
-//               onChange={(e) => setResponseText(e.target.value)}
-//             />
-//             <div className={styles.popupActions}>
-//               <button onClick={handleSubmit} className={styles.submitBtn}>
-//                 Submit
-//               </button>
-//               <button
-//                 onClick={() => {
-//                   setShowPopup(false);
-//                   setSelectedStatus("");
-//                 }}
-//                 className={styles.cancelBtn}
-//               >
-//                 Cancel
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default OfficialStatusDropdown;
-
-
-
 import React, { useState, useEffect } from "react";
 import styles from "./OfficialStatusDropdown.module.css";
 
@@ -88,7 +10,6 @@ const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) 
 
   const maxChars = 500;
 
-  // Prevent body scroll when popup is open
   useEffect(() => {
     if (showPopup) {
       document.body.style.overflow = 'hidden';
@@ -103,6 +24,17 @@ const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) 
   const handleSelect = (e) => {
     const status = e.target.value;
     if (!status) return;
+    
+    // Check location before opening popup
+    const userStr = localStorage.getItem("user");
+    const currentUser = userStr ? JSON.parse(userStr) : null;
+    
+    if (currentUser && currentUser.location && petition.location && 
+        currentUser.location !== petition.location) {
+      alert(`You can only manage petitions in your assigned location (${currentUser.location}). This petition is in ${petition.location}.`);
+      return;
+    }
+    
     setSelectedStatus(status);
     setShowPopup(true);
   };
@@ -123,13 +55,68 @@ const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) 
 
     setIsSubmitting(true);
 
-    const statusLabel = `${selectedStatus} (by ${officialName || "Official"})`;
-
     try {
-      // Wait until popup closes to prevent re-render flicker
-      await handleStatusUpdate(petition._id, statusLabel, responseText);
-      
-      // Close popup and reset with a slight delay for better UX
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in to update petition status.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Verify location one more time
+      const userStr = localStorage.getItem("user");
+      const currentUser = userStr ? JSON.parse(userStr) : null;
+
+      if (currentUser && currentUser.location && petition.location && 
+          currentUser.location !== petition.location) {
+        alert(`You can only manage petitions in your assigned location (${currentUser.location}). This petition is in ${petition.location}.`);
+        setIsSubmitting(false);
+        return;
+      }
+
+      let apiUrl;
+      let requestBody;
+      let method;
+
+      // Use the correct official API based on action
+      if (selectedStatus === "closed") {
+        apiUrl = `http://localhost:4000/api/official/petitions/${petition._id}/close`;
+        requestBody = { reason: responseText };
+        method = "POST";
+      } else {
+        apiUrl = `http://localhost:4000/api/official/petitions/${petition._id}/status`;
+        // Map frontend status to backend expected values
+        let backendStatus = selectedStatus;
+        if (selectedStatus === "under-review") {
+          backendStatus = "under_review";
+        }
+        
+        requestBody = {
+          status: backendStatus,
+          comment: responseText
+        };
+        method = "PUT";
+      }
+
+      const res = await fetch(apiUrl, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to update petition status");
+      }
+
+      // Call the parent handler to refresh the petition data
+      if (handleStatusUpdate) {
+        await handleStatusUpdate(petition._id);
+      }
+
       setTimeout(() => {
         setShowPopup(false);
         setResponseText("");
@@ -137,8 +124,10 @@ const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) 
         setCharCount(0);
         setIsSubmitting(false);
       }, 300);
+
     } catch (error) {
       console.error("Error updating status:", error);
+      alert(error.message || "Error updating petition status");
       setIsSubmitting(false);
     }
   };
@@ -150,7 +139,6 @@ const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) 
     setCharCount(0);
   };
 
-  // Close popup on Escape key
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape' && showPopup && !isSubmitting) {
@@ -188,19 +176,51 @@ const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) 
     }
   };
 
+  // Check if official can manage this petition
+  const canManagePetition = () => {
+    const userStr = localStorage.getItem("user");
+    const currentUser = userStr ? JSON.parse(userStr) : null;
+    
+    if (!currentUser || !currentUser.location || !petition.location) {
+      return false;
+    }
+    
+    return currentUser.location === petition.location;
+  };
+
+  // Normalize status for display
+  const normalizeStatus = (status) => {
+    if (!status) return "active";
+    return status.toLowerCase().replace(/_/g, '-');
+  };
+
+  const petitionStatus = normalizeStatus(petition.status);
+
   return (
     <div className={styles.dropdownWrapper}>
-      <select
-        className={styles.dropdown}
-        value={selectedStatus}
-        onChange={handleSelect}
-        disabled={isSubmitting}
-      >
-        <option value="">Change Status</option>
-        <option value="under-review">🔍 Set Under Review</option>
-        <option value="closed">🔒 Close Petition</option>
-        <option value="active">✅ Reopen Petition</option>
-      </select>
+      {!canManagePetition() ? (
+        <span className={styles.locationWarning} title={`This petition is in ${petition.location}`}>
+          ⚠️ Different Location
+        </span>
+      ) : (
+        <select
+          className={styles.dropdown}
+          value={selectedStatus}
+          onChange={handleSelect}
+          disabled={isSubmitting}
+        >
+          <option value="">Change Status</option>
+          <option value="under-review" disabled={petitionStatus === "under-review"}>
+            🔍 Set Under Review
+          </option>
+          <option value="closed" disabled={petitionStatus === "closed"}>
+            🔒 Close Petition
+          </option>
+          <option value="active" disabled={petitionStatus === "active"}>
+            ✅ Reopen Petition
+          </option>
+        </select>
+      )}
 
       {showPopup && (
         <div className={styles.popupOverlay} onClick={handleCancel}>

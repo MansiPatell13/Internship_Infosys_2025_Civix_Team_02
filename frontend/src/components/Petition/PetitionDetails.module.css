@@ -1069,3 +1069,228 @@
     width: 100%;
   }
 }
+
+/* Add these styles to your existing PetitionDetails.module.css */
+
+/* Official Response Box */
+.responseBox {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-left: 4px solid #f59e0b;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
+}
+
+.responseBox h4 {
+  color: #92400e;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.responseBox p {
+  color: #78350f;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.responseDate {
+  display: block;
+  margin-top: 0.5rem;
+  color: #92400e;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+/* Comments Section */
+.commentsSection {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid #e5e7eb;
+}
+
+.commentsSection h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+/* Add Comment Box */
+.addCommentBox {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.commentTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s;
+}
+
+.commentTextarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.commentTextarea:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.addCommentBtn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addCommentBtn:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.addCommentBtn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Comments List */
+.commentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.noComments {
+  text-align: center;
+  color: #6b7280;
+  padding: 2rem;
+  font-style: italic;
+}
+
+.commentItem {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: box-shadow 0.2s;
+}
+
+.commentItem:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.officialComment {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-left: 4px solid #3b82f6;
+}
+
+.commentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.commentHeader strong {
+  color: #1f2937;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.officialComment .commentHeader strong {
+  color: #1e40af;
+}
+
+.commentHeader small {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.commentContent {
+  color: #374151;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.commentStatus {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: #f3f4f6;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .responseBox {
+    padding: 1rem;
+  }
+
+  .responseBox h4 {
+    font-size: 1rem;
+  }
+
+  .commentsSection {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+  }
+
+  .commentItem {
+    padding: 0.75rem;
+  }
+
+  .addCommentBox {
+    padding: 0.75rem;
+  }
+}
+
+.activeButton{
+      background: linear-gradient(135deg, #53de86, #527760);
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s 
+ease;
+    text-transform: none;
+    letter-spacing: normal;
+    border: 1px solid #e2e8f0;
+    position: static;
+    overflow: visible;
+    box-shadow: none;
+    color: white;
+}

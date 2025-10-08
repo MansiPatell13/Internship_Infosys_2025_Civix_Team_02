@@ -2,20 +2,43 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { body, validationResult } from "express-validator";
 import User from "../models/User.js";
-import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
-// Apply auth middleware to all settings routes
-router.use(requireAuth);
+// Standardized error response helper
+const sendError = (res, status, message, errors = null) => {
+  console.error(`[Settings Error] ${message}`, errors || '');
+  res.status(status).json({
+    success: false,
+    message,
+    ...(errors && { errors })
+  });
+};
+
+// Standardized success response helper
+const sendSuccess = (res, data, message = 'Operation successful') => {
+  console.log(`[Settings Success] ${message}`);
+  res.json({
+    success: true,
+    message,
+    ...data
+  });
+};
 
 // GET /api/user/settings - Get user settings
 router.get("/", async (req, res) => {
   try {
+    console.log(`[Settings] Getting settings for user ${req.user._id}`);
     const user = await User.findById(req.user._id).select("-password");
-    res.json(user);
+    
+    if (!user) {
+      return sendError(res, 404, "User not found");
+    }
+
+    sendSuccess(res, { user });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching user settings" });
+    console.error("[Settings Error] Failed to fetch settings:", error);
+    sendError(res, 500, "Error fetching user settings");
   }
 });
 
@@ -31,9 +54,10 @@ router.put("/",
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return sendError(res, 400, "Validation failed", errors.array());
       }
 
+      console.log(`[Settings] Updating settings for user ${req.user._id}`, req.body);
       const { name, email, location } = req.body;
       const updates = {};
 
@@ -43,9 +67,10 @@ router.put("/",
       
       // Handle email update separately (check for duplicates)
       if (email && email !== req.user.email) {
+        console.log(`[Settings] Checking email availability: ${email}`);
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-          return res.status(400).json({ message: "Email already in use" });
+          return sendError(res, 400, "Email already in use");
         }
         updates.email = email;
       }
@@ -56,12 +81,15 @@ router.put("/",
         { new: true }
       ).select("-password");
 
-      res.json({
-        message: "Settings updated successfully",
-        user
-      });
+      if (!user) {
+        return sendError(res, 404, "User not found");
+      }
+
+      console.log(`[Settings] Successfully updated settings for user ${req.user._id}`);
+      sendSuccess(res, { user }, "Settings updated successfully");
     } catch (error) {
-      res.status(500).json({ message: "Error updating settings" });
+      console.error("[Settings Error] Failed to update settings:", error);
+      sendError(res, 500, "Error updating settings");
     }
   }
 );
@@ -88,18 +116,23 @@ router.put("/password",
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return sendError(res, 400, "Validation failed", errors.array());
       }
 
+      console.log(`[Settings] Attempting password change for user ${req.user._id}`);
       const { currentPassword, newPassword } = req.body;
 
       // Get user with password
       const user = await User.findById(req.user._id);
+      if (!user) {
+        return sendError(res, 404, "User not found");
+      }
       
       // Verify current password
       const isMatch = await bcrypt.compare(currentPassword, user.password);
       if (!isMatch) {
-        return res.status(401).json({ message: "Current password is incorrect" });
+        console.log(`[Settings] Invalid current password attempt for user ${req.user._id}`);
+        return sendError(res, 401, "Current password is incorrect");
       }
 
       // Hash new password
@@ -110,9 +143,11 @@ router.put("/password",
       user.password = hashedPassword;
       await user.save();
 
-      res.json({ message: "Password updated successfully" });
+      console.log(`[Settings] Successfully updated password for user ${req.user._id}`);
+      sendSuccess(res, {}, "Password updated successfully");
     } catch (error) {
-      res.status(500).json({ message: "Error updating password" });
+      console.error("[Settings Error] Failed to update password:", error);
+      sendError(res, 500, "Error updating password");
     }
   }
 );
@@ -126,26 +161,33 @@ router.delete("/",
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return sendError(res, 400, "Validation failed", errors.array());
       }
 
+      console.log(`[Settings] Attempting account deletion for user ${req.user._id}`);
       const { password } = req.body;
 
       // Get user with password
       const user = await User.findById(req.user._id);
+      if (!user) {
+        return sendError(res, 404, "User not found");
+      }
       
       // Verify password
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(401).json({ message: "Invalid password" });
+        console.log(`[Settings] Invalid password attempt during account deletion for user ${req.user._id}`);
+        return sendError(res, 401, "Invalid password");
       }
 
       // Delete user
       await User.findByIdAndDelete(req.user._id);
 
-      res.json({ message: "Account deleted successfully" });
+      console.log(`[Settings] Successfully deleted account for user ${req.user._id}`);
+      sendSuccess(res, {}, "Account deleted successfully");
     } catch (error) {
-      res.status(500).json({ message: "Error deleting account" });
+      console.error("[Settings Error] Failed to delete account:", error);
+      sendError(res, 500, "Error deleting account");
     }
   }
 );
