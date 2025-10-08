@@ -937,3 +937,238 @@ body {
   }
 
 }
+/* Tablet/Desktop Transition (max-width: 1024px) */
+@media (max-width: 1024px) {
+    .main-content {
+        flex-direction: column;
+        padding: 1.5rem 0;
+        gap: 1.5rem;
+    }
+    
+    /* Remove sticky and make it a systematic grid container */
+    .left-panel-fixed {
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+    }
+    
+    .left-panel {
+        width: 100%;
+        min-width: unset;
+        
+        /* KEY: Use Grid for a systematic two-column layout */
+        display: grid; 
+        grid-template-columns: 1fr 1fr; /* Two equal columns */
+        gap: 1.5rem; 
+        /* Ensure the grid doesn't exceed 100% width on wider screens */
+        max-width: 100%;
+    }
+    
+    /* Apply systematic styling to both cards */
+    .user-card, .menu-card {
+        flex: initial; /* Override previous flex rules */
+        min-width: 280px;
+        padding: 1.25rem;
+        /* KEY: Ensure both cards fill their allocated grid area perfectly */
+        width: 100%; 
+        height: 100%; 
+        box-sizing: border-box;
+    }
+
+    /* 1. Systematic User Card (Profile/Username Box) */
+    .user-card .user-info {
+        display: flex;
+        flex-direction: row; 
+        gap: 1rem;
+        align-items: center;
+        text-align: left;
+    }
+
+    .user-card .user-avatar {
+        font-size: 3rem; 
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    .user-card .user-info h2 {
+        font-size: 1.3rem; 
+        margin: 0;
+        white-space: nowrap; 
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .user-card .user-info p {
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    /* 2. Systematic Menu Card (Create Petition Box) */
+    .menu-card {
+        /* Use Flexbox for content alignment within the grid cell */
+        display: flex;
+        flex-direction: column;
+        /* Vertically align menu content in the center */
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .menu-list {
+        display: flex;
+        flex-wrap: wrap; 
+        justify-content: center;
+        gap: 0.5rem; 
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .menu-list a {
+        /* Systematic button styling */
+        flex: 0 0 auto; 
+        padding: 0.5rem 0.8rem; 
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0; 
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        background-color: #f7f7f7;
+        text-align: center;
+        transition: all 0.2s;
+    }
+    
+    .menu-list a:hover {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .menu-list a .icon {
+        display: none; 
+    }
+
+    .menu-list a.logout {
+        color: #d32f2f;
+        border-color: #fca5a5;
+        background-color: #fef2f2;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+/* Small Tablet/Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 0 0.5rem;
+    }
+    
+    .main-content {
+        padding: 1rem 0;
+        gap: 1rem;
+    }
+    
+    .left-panel {
+        /* Revert to column for stacking */
+        display: flex; 
+        margin: auto; 
+         position: static !important;
+         top: auto !important; 
+        flex-direction: column;
+        width:100%;
+        grid-template-columns: none; /* Disable grid */
+        justify-content: flex-start;
+        align-items: center;
+        height: auto;
+    }
+    
+    .user-card, .menu-card {
+        width: 100%;
+        min-width: unset;
+        flex: none;
+        height: auto;
+    }
+    
+    /* REVERT: User Card back to centered column layout */
+    .user-card .user-info {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+        text-align: center;
+    }
+
+    .user-card .user-avatar {
+        font-size: 4rem; /* Restore large avatar */
+        margin-bottom: 0.5rem;
+    }
+
+    /* REVERT: Menu List back to standard column layout */
+    .menu-list {
+        flex-direction: column; 
+        gap: 0;
+        justify-content: flex-start;
+    }
+    
+    .menu-list a {
+        justify-content: flex-start; /* Restore left alignment */
+        padding: 0.75rem 1rem; 
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+        border: none; /* Remove button borders */
+        background-color: transparent; /* Remove button background */
+        font-weight: 500;
+    }
+    
+    .menu-list a .icon {
+        display: inline; /* Show icons again */
+        margin-right: 0.8rem;
+    }
+
+    /* Rest of mobile styles (stat-card, filters, etc.) remain as is */
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .stat-card h2 {
+        font-size: 2rem;
+    }
+    
+    .filter-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .petitions-list, .polls-display {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .pagination-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+        min-width: 40px;
+    }
+    
+    .tab-navigation {
+        margin-bottom: 1rem;
+    }
+    
+    .tab-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .poll-card {
+        padding: 1.25rem;
+    }
+    
+    .poll-card h3 {
+        font-size: 1.15rem;
+    }
+    
+    .poll-card p {
+        font-size: 0.85rem;
+    }
+    
+}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaPencilAlt } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import Footer from "../Landing/Footer";
@@ -8,7 +8,7 @@ import styles from "./PetitionPage.module.css";
 const PetitionPage = ({ isInDashboard = false, onSuccess }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const showBackButton = location.state?.from === 'petition-head' || !isInDashboard;
 
   const [petition, setPetition] = useState({
@@ -17,8 +17,28 @@ const PetitionPage = ({ isInDashboard = false, onSuccess }) => {
     location: "",
     goal: 100,
     description: "",
-    image: null, 
+    image: null,
   });
+
+  const [role, setRole] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setRole(parsedUser.role);
+
+        // If official, show popup
+        if (parsedUser.role === "official") {
+          setShowPopup(true);
+        }
+      } catch (err) {
+        console.error("Error parsing user:", err);
+      }
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,7 +54,6 @@ const PetitionPage = ({ isInDashboard = false, onSuccess }) => {
 
   const handlePublish = async (e) => {
     e.preventDefault();
-
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -76,8 +95,7 @@ const PetitionPage = ({ isInDashboard = false, onSuccess }) => {
       setPetition((prev) => ({ ...prev, image: data.image }));
 
       alert("Petition created successfully!");
-      
-      // Reset form
+
       setPetition({
         title: "",
         category: "",
@@ -87,7 +105,6 @@ const PetitionPage = ({ isInDashboard = false, onSuccess }) => {
         image: null,
       });
 
-      // Handle navigation based on context
       if (isInDashboard && onSuccess) {
         onSuccess();
       } else {
@@ -105,138 +122,158 @@ const PetitionPage = ({ isInDashboard = false, onSuccess }) => {
   return (
     <div className={containerClass}>
       {!isInDashboard && <Navbar />}
-      <div className={isInDashboard ? '' : styles.container}>
+      <div className={isInDashboard ? "" : styles.container}>
         {showBackButton && !isInDashboard && (
           <button className={styles.backButton} onClick={() => navigate(-1)}>
             ← Back
           </button>
         )}
-        <div className={cardClass}>
-          <div className={styles.headerRow}>
-            <div>
-              <h1 className={styles.headerTitle}>Petition Creation</h1>
-            </div>
-            <div>
-              <h4 className={styles.headerLogo}>Civix</h4>
-            </div>
-          </div>
 
-          <div className={styles.createPetition}>
-            <FaPencilAlt /> Create a new petition
-          </div>
-
-          {/* Title */}
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              Petition Title <span className={styles.required}>*</span>
-            </label>
-            <input
-              type="text"
-              className={styles.formControl}
-              placeholder="Give a title to your Petition"
-              name="title"
-              value={petition.title}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Category + Location */}
-          <div className={`${styles.formGroup} ${styles.formRow}`}>
-            <div className={styles.col}>
-              <label className={styles.formLabel}>Category</label>
-              <select
-                className={styles.formSelect}
-                name="category"
-                value={petition.category}
-                onChange={handleChange}
+        {/* Popup for officials */}
+        {showPopup && (
+          <div className={styles.popupOverlay}>
+            <div className={styles.popupBox}>
+              <h3>Access Restricted</h3>
+              <p>Only citizens can create petitions.</p>
+              {/* <button
+                className={styles.cancelBtn}
+                onClick={() => setShowPopup(false)}
               >
-                <option>All Categories</option>
-                <option value="Environment">Environment</option>
-                <option value="Transport">Transportation</option>
-                <option value="Education">Education</option>
-                <option value="Health & Safety">Public Safety</option>
-                <option value="Local Government & Policy">Healthcare</option>
-                <option value="Community & Social Issues">Infrastructure</option>
-                <option value="Community & Social Issues">Animal Welfare</option>
-              </select>
+                Close
+              </button> */}
+            </div>
+          </div>
+        )}
+
+        {/* Show form only for citizens */}
+        {role !== "official" && (
+          <div className={cardClass}>
+            <div className={styles.headerRow}>
+              <div>
+                <h1 className={styles.headerTitle}>Petition Creation</h1>
+              </div>
+              <div>
+                <h4 className={styles.headerLogo}>Civix</h4>
+              </div>
             </div>
 
-            <div className={styles.col}>
+            <div className={styles.createPetition}>
+              <FaPencilAlt /> Create a new petition
+            </div>
+
+            {/* Title */}
+            <div className={styles.formGroup}>
               <label className={styles.formLabel}>
-                Location <span className={styles.required}>*</span>
+                Petition Title <span className={styles.required}>*</span>
               </label>
               <input
                 type="text"
                 className={styles.formControl}
-                placeholder="Search location"
-                name="location"
-                value={petition.location}
+                placeholder="Give a title to your Petition"
+                name="title"
+                value={petition.title}
                 onChange={handleChange}
                 required
               />
             </div>
-          </div>
 
-          {/* Goal */}
-          <div className={`${styles.formGroup} ${styles.formRow}`}>
-            <div className={styles.col}>
-              <label className={styles.formLabel}>Signature Goal</label>
-              <input
-                type="number"
-                className={styles.formControl}
-                placeholder="100"
-                name="goal"
-                value={petition.goal}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
+            {/* Category + Location */}
+            <div className={`${styles.formGroup} ${styles.formRow}`}>
+              <div className={styles.col}>
+                <label className={styles.formLabel}>Category</label>
+                <select
+                  className={styles.formSelect}
+                  name="category"
+                  value={petition.category}
+                  onChange={handleChange}
+                >
+                  <option>All Categories</option>
+                  <option value="Environment">Environment</option>
+                  <option value="Transport">Transportation</option>
+                  <option value="Education">Education</option>
+                  <option value="Health & Safety">Public Safety</option>
+                  <option value="Local Government & Policy">Healthcare</option>
+                  <option value="Community & Social Issues">Infrastructure</option>
+                  <option value="Community & Social Issues">Animal Welfare</option>
+                </select>
+              </div>
 
-          {/* Description */}
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              Description <span className={styles.required}>*</span>
-            </label>
-            <textarea
-              className={styles.formControl}
-              rows={4}
-              placeholder="Describe the issue and change you would like to see..."
-              name="description"
-              value={petition.description}
-              onChange={handleChange}
-              required
-            ></textarea>
-          </div>
-
-          {/* Image Upload + Preview */}
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Upload Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              className={styles.formControl}
-              onChange={handleImageChange}
-            />
-            {petition.image && typeof petition.image !== "string" && (
-              <div className={styles.imagePreview}>
-                <p className={styles.formLabel}>Preview:</p>
-                <img
-                  src={URL.createObjectURL(petition.image)}
-                  alt="Petition Preview"
-                  className={styles.previewImage}
+              <div className={styles.col}>
+                <label className={styles.formLabel}>
+                  Location <span className={styles.required}>*</span>
+                </label>
+                <input
+                  type="text"
+                  className={styles.formControl}
+                  placeholder="Search location"
+                  name="location"
+                  value={petition.location}
+                  onChange={handleChange}
+                  required
                 />
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Publish button */}
-          <div className={styles.formActions}>
-            <button className={styles.primaryButton} onClick={handlePublish}>
-              Publish
-            </button>
+            {/* Goal */}
+            <div className={`${styles.formGroup} ${styles.formRow}`}>
+              <div className={styles.col}>
+                <label className={styles.formLabel}>Signature Goal</label>
+                <input
+                  type="number"
+                  className={styles.formControl}
+                  placeholder="100"
+                  name="goal"
+                  value={petition.goal}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                Description <span className={styles.required}>*</span>
+              </label>
+              <textarea
+                className={styles.formControl}
+                rows={4}
+                placeholder="Describe the issue and change you would like to see..."
+                name="description"
+                value={petition.description}
+                onChange={handleChange}
+                required
+              ></textarea>
+            </div>
+
+            {/* Image Upload + Preview */}
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Upload Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                className={styles.formControl}
+                onChange={handleImageChange}
+              />
+              {petition.image && typeof petition.image !== "string" && (
+                <div className={styles.imagePreview}>
+                  <p className={styles.formLabel}>Preview:</p>
+                  <img
+                    src={URL.createObjectURL(petition.image)}
+                    alt="Petition Preview"
+                    className={styles.previewImage}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Publish button */}
+            <div className={styles.formActions}>
+              <button className={styles.primaryButton} onClick={handlePublish}>
+                Publish
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       {!isInDashboard && <Footer />}
     </div>

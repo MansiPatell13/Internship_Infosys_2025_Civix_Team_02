@@ -109,13 +109,13 @@ const PollList = ({ onPollClick, onBack, onCreatePoll }) => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.createPollHeader}>
+{/*       <div className={styles.createPollHeader}>
         <button onClick={onBack} className={styles.backToPollsBtn}>
           <FaArrowLeft /> Back
         </button>
-      </div>
+      </div> */}
 
-      <div className={styles.pollsHeader}> 
+{/*       <div className={styles.pollsHeader}> 
         <div className={styles.headerContent}>
           <div className={styles.titleSection}>
             <h1 className={styles.title}>
@@ -127,12 +127,8 @@ const PollList = ({ onPollClick, onBack, onCreatePoll }) => {
             </p>
           </div>
           
-{/*           NEW: Create Poll button
-          <button onClick={onCreatePoll} className={styles.createPollBtn}>
-            <FaPlus /> Create Poll
-          </button> */}
         </div>
-      </div>
+      </div> */}
 
       <div className={`${styles.content} ${styles.listContainer}`}>
         <div className={styles.tabsAndSearchContainer}>
@@ -141,19 +137,22 @@ const PollList = ({ onPollClick, onBack, onCreatePoll }) => {
               className={`${styles.statusTab} ${statusFilter === "all" ? styles.activeTab : ''}`}
               onClick={() => { setStatusFilter("all"); setCurrentPage(1); }}
             >
-              All <span className={styles.tabCount}>{counts.all}</span>
+              All 
+{/* <span className={styles.tabCount}>{counts.all}</span> */}
             </button>
             <button
               className={`${styles.statusTab} ${statusFilter === "active" ? styles.activeTab : ''}`}
               onClick={() => { setStatusFilter("active"); setCurrentPage(1); }}
             >
-              Active <span className={styles.tabCount}>{counts.active}</span>
+              Active 
+{/* <span className={styles.tabCount}>{counts.active}</span> */}
             </button>
             <button
               className={`${styles.statusTab} ${statusFilter === "closed" ? styles.activeTab : ''}`}
               onClick={() => { setStatusFilter("closed"); setCurrentPage(1); }}
             >
-              Closed <span className={styles.tabCount}>{counts.closed}</span>
+              Closed 
+{/* <span className={styles.tabCount}>{counts.closed}</span> */}
             </button>
             </div>
 
@@ -170,9 +169,9 @@ const PollList = ({ onPollClick, onBack, onCreatePoll }) => {
           </div>
         </div>
 
-        <div className={styles.resultsInfo}>
+{/*         <div className={styles.resultsInfo}>
           <p>Showing {startIdx + 1}-{Math.min(endIdx, filteredPolls.length)} of {filteredPolls.length} polls</p>
-        </div>
+        </div> */}
 
         {loading ? (
           <div className={styles.loading}>

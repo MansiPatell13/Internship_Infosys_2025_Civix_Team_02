@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../Landing/Footer";
 import Navbar from "../Landing/Navbar";
 import styles from "./PetitionHead.module.css";
-import OfficialStatusDropdown from "./OfficialStatusDropDown";
+import OfficialStatusDropdown from "./OfficialStatusDropdown";
 
-const PetitionHead = () => {
+const PetitionHead = ({ isInDashboard, onViewDetails }) => {
   const navigate = useNavigate();
   const [petitions, setPetitions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +15,7 @@ const PetitionHead = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [petitionsPerPage] = useState(9);
   const [popup, setPopup] = useState("");
+  const [userLocation, setUserLocation] = useState("");
 
   const decodeToken = (token) => {
     try {
@@ -30,7 +31,6 @@ const PetitionHead = () => {
     }
   };
 
-  // Get user info with fallback to token decoding
   const getUserInfo = () => {
     let userId = localStorage.getItem("userId") || "";
     let userObject = {};
@@ -41,7 +41,6 @@ const PetitionHead = () => {
       userObject = {};
     }
 
-    // If localStorage doesn't have user info, try to get it from token
     if (!userId || Object.keys(userObject).length === 0) {
       const token = localStorage.getItem("token");
       if (token) {
@@ -56,7 +55,6 @@ const PetitionHead = () => {
             userType: decodedToken.role
           };
           
-          // Update localStorage for future use
           localStorage.setItem("userId", userId);
           localStorage.setItem("user", JSON.stringify(userObject));
         }
@@ -83,6 +81,28 @@ const PetitionHead = () => {
       (userObject.name.toLowerCase().includes("official") ||
         userObject.name.toLowerCase().includes("admin") ||
         userObject.name.toLowerCase().includes("government")));
+
+  useEffect(() => {
+    const fetchUserLocation = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await fetch("http://localhost:4000/api/dashboard", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setUserLocation(data.user?.location || "");
+        }
+      } catch (error) {
+        console.error("Error fetching user location:", error);
+      }
+    };
+
+    fetchUserLocation();
+  }, []);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -144,15 +164,26 @@ const PetitionHead = () => {
     });
   };
 
+  const normalizeStatus = (status) => {
+    if (!status) return "active";
+    const normalized = status.toLowerCase().replace(/[_\s]+/g, ' ').trim();
+    return normalized;
+  };
+
   const filteredPetitions = petitions
     .filter((petition) => petition)
     .filter((petition) => {
+      if (activeTab === "location") {
+        return petition.location === userLocation;
+      }
+
       if (isOfficial) {
+        const petitionStatus = normalizeStatus(petition.status);
         if (activeTab === "under-review") {
-          return petition.status === "under-review" || petition.status === "pending";
+          return petitionStatus === "under review" || petitionStatus === "pending";
         }
         if (activeTab === "closed") {
-          return petition.status === "closed" || petition.status === "resolved";
+          return petitionStatus === "closed" || petitionStatus === "resolved";
         }
         return true;
       }
@@ -171,7 +202,6 @@ const PetitionHead = () => {
       return true;
     });
 
-  // Pagination logic
   const indexOfLastPetition = currentPage * petitionsPerPage;
   const indexOfFirstPetition = indexOfLastPetition - petitionsPerPage;
   const currentPetitions = filteredPetitions.slice(indexOfFirstPetition, indexOfLastPetition);
@@ -182,41 +212,12 @@ const PetitionHead = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleStatusUpdate = async (petitionId, newStatus, responseText) => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setPopup("You must be logged in to update petition status.");
-      return;
-    }
-
-    const res = await fetch(`http://localhost:4000/api/petitions/${petitionId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        status: newStatus,
-        officialResponse: responseText, // optional field
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || "Failed to update petition status");
-    }
-
-    setPopup(`Petition status updated to ${newStatus}!`);
-
-    // Delay refetch to avoid flicker
-    setTimeout(fetchPetitions, 400);
-
-  } catch (error) {
-    setPopup("Error updating petition status: " + error.message);
-  }
-};
-
+  const handleStatusUpdate = async (petitionId) => {
+    // Refresh the specific petition or all petitions
+    await fetchPetitions();
+    setPopup("Petition status updated successfully!");
+    setTimeout(() => setPopup(""), 3000);
+  };
 
   const handleSign = async (id) => {
     try {
@@ -240,7 +241,6 @@ const PetitionHead = () => {
         return;
       }
 
-      // Update the petition in the state
       setPetitions((prev) =>
         prev.map((p) => {
           if (p._id === id) {
@@ -259,14 +259,23 @@ const PetitionHead = () => {
     }
   };
 
+  const handleViewDetailsClick = (petitionId) => {
+    if (isInDashboard && onViewDetails) {
+      onViewDetails(petitionId);
+    } else {
+      navigate(`/petition/${petitionId}`);
+    }
+  };
+
   const getStatusColor = (status) => {
-    switch (status) {
+    const normalized = normalizeStatus(status);
+    switch (normalized) {
       case 'active':
         return '#10b981';
       case 'closed':
       case 'resolved':
         return '#ef4444';
-      case 'under-review':
+      case 'under review':
       case 'pending':
         return '#3b82f6';
       default:
@@ -274,81 +283,33 @@ const PetitionHead = () => {
     }
   };
 
-  const getPageTitle = () => {
-    if (isOfficial) {
-      switch (activeTab) {
-        case "under-review":
-          return "Petitions Under Review";
-        case "closed":
-          return "Closed Petitions";
-        default:
-          return "All Petitions";
-      }
-    }
-    switch (activeTab) {
-      case "mine":
-        return "My Petitions";
-      case "signed":
-        return "Signed By Me";
-      default:
-        return "All Petitions";
-    }
-  };
-
-  const getPageDescription = () => {
-    if (isOfficial) {
-      switch (activeTab) {
-        case "under-review":
-          return "Review and manage petitions that require official attention.";
-        case "closed":
-          return "View petitions that have been resolved or closed.";
-        default:
-          return "Overview of all petitions in the system.";
-      }
-    }
-    switch (activeTab) {
-      case "mine":
-        return "Petitions you have created and are managing.";
-      case "signed":
-        return "Petitions you have signed and are supporting.";
-      default:
-        return "Browse, sign, and track petitions in your community.";
-    }
-  };
-
-  const getEmptyMessage = () => {
-    if (isOfficial) {
-      switch (activeTab) {
-        case "under-review":
-          return "No petitions are currently under review.";
-        case "closed":
-          return "No closed petitions found.";
-        default:
-          return "No petitions found in the system.";
-      }
-    }
-    switch (activeTab) {
-      case "mine":
-        return "You haven't created any petitions yet. Start by creating your first petition!";
-      case "signed":
-        return "You haven't signed any petitions yet. Browse and support causes you care about!";
-      default:
-        return "No petitions found.";
-    }
+  const getStatusDisplay = (status) => {
+    const normalized = normalizeStatus(status);
+    return normalized.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   };
 
   const myPetitionsCount = petitions.filter((p) => isUserOwnPetition(p)).length;
   const signedPetitionsCount = petitions.filter(
     (p) => isUserSignedPetition(p) && !isUserOwnPetition(p)
   ).length;
+  const locationPetitionsCount = petitions.filter(
+    (p) => p.location === userLocation
+  ).length;
   const underReviewCount = petitions.filter(
-    (p) => p.status === "under-review" || p.status === "pending"
+    (p) => {
+      const status = normalizeStatus(p.status);
+      return status === "under review" || status === "pending";
+    }
   ).length;
   const closedCount = petitions.filter(
-    (p) => p.status === "closed" || p.status === "resolved"
+    (p) => {
+      const status = normalizeStatus(p.status);
+      return status === "closed" || status === "resolved";
+    }
   ).length;
 
-  // Pagination component
   const PaginationComponent = () => {
     if (totalPages <= 1) return null;
 
@@ -427,7 +388,6 @@ const PetitionHead = () => {
     );
   };
 
-  // Popup component
   const Popup = ({ message, onClose }) =>
     message ? (
       <div className={styles.popupOverlay} onClick={onClose}>
@@ -440,25 +400,34 @@ const PetitionHead = () => {
       </div>
     ) : null;
 
+  const getEmptyMessage = () => {
+    if (activeTab === "location") {
+      return `No petitions found in ${userLocation}. ${isOfficial ? 'No petitions in your jurisdiction yet.' : 'Be the first to create one!'}`;
+    }
+
+    if (isOfficial) {
+      switch (activeTab) {
+        case "under-review":
+          return "No petitions are currently under review.";
+        case "closed":
+          return "No closed petitions found.";
+        default:
+          return "No petitions found in the system.";
+      }
+    }
+    switch (activeTab) {
+      case "mine":
+        return "You haven't created any petitions yet. Start by creating your first petition!";
+      case "signed":
+        return "You haven't signed any petitions yet. Browse and support causes you care about!";
+      default:
+        return "No petitions found.";
+    }
+  };
+
   return (
     <>
       <div className={styles.container}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
-          ← Back
-        </button>
-        <div className={styles.header}>
-          <h2 className={styles.title}>{getPageTitle()}</h2>
-          {!isOfficial && (
-            <button
-              className={styles.createBtn}
-              onClick={() => navigate("/petition")}
-            >
-              <FaPlus className={styles.icon} /> Create Petition
-            </button>
-          )}
-        </div>
-        <p className={styles.descriptionText}>{getPageDescription()}</p>
-
         <div className={styles.controls}>
           <div className={styles.tabGroup}>
             {isOfficial ? (
@@ -470,6 +439,14 @@ const PetitionHead = () => {
                   onClick={() => handleTabChange("all")}
                 >
                   All Petitions
+                </button>
+                <button
+                  className={`${styles.tabBtn} ${
+                    activeTab === "location" ? styles.activeTab : ""
+                  }`}
+                  onClick={() => handleTabChange("location")}
+                >
+                  My Location ({locationPetitionsCount})
                 </button>
                 <button
                   className={`${styles.tabBtn} ${
@@ -514,6 +491,14 @@ const PetitionHead = () => {
                 >
                   Signed By Me ({signedPetitionsCount})
                 </button>
+                <button
+                  className={`${styles.tabBtn} ${
+                    activeTab === "location" ? styles.activeTab : ""
+                  }`}
+                  onClick={() => handleTabChange("location")}
+                >
+                  In My Location ({locationPetitionsCount})
+                </button>
               </>
             )}
           </div>
@@ -550,6 +535,15 @@ const PetitionHead = () => {
                   <div className={styles.emptyState}>
                     <i className="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
                     <h5 className={styles.emptyMessage}>{getEmptyMessage()}</h5>
+                    {activeTab === "location" && !isOfficial && (
+                      <button
+                        className={styles.createBtnSecondary}
+                        onClick={() => navigate("/petition")}
+                      >
+                        <FaPlus className={styles.icon} />
+                        Create Petition in {userLocation}
+                      </button>
+                    )}
                     {activeTab === "mine" && !isOfficial && (
                       <button
                         className={styles.createBtnSecondary}
@@ -571,6 +565,9 @@ const PetitionHead = () => {
                               {petition?.category || "N/A"}
                             </span>
                           </div>
+                          <p className={styles.locationDescription}>
+                            {petition?.location}
+                          </p>
                           <p className={styles.cardDescription}>
                             {petition?.description?.length > 100
                               ? `${petition.description.substring(0, 100)}...`
@@ -592,7 +589,7 @@ const PetitionHead = () => {
                                   color: getStatusColor(petition.status)
                                 }}
                               >
-                                | {petition.status}
+                                | {getStatusDisplay(petition.status)}
                               </span>
                             </p>
 
@@ -614,47 +611,45 @@ const PetitionHead = () => {
                           <div className={styles.actions}>
                             <button
                               className={styles.detailsBtn}
-                              onClick={() => navigate(`/petition/${petition._id}`)}
+                              onClick={() => handleViewDetailsClick(petition._id)}
                             >
                               View Details
                             </button>
-{isOfficial ? (
-  <div className={styles.officialActions}>
-    {/* Officials can only view details now */}
-    {/* <button
-      className={styles.detailsBtn}
-      onClick={() => navigate(`/petition/${petition._id}`)}
-    >
-      View Details
-    </button> */}
-  </div>
-) : (
-  <div className={styles.userActions}>
-    {!isUserOwnPetition(petition) && (
-      <button
-        className={`${styles.actionBtn} ${
-          isUserSignedPetition(petition)
-            ? styles.signedBtn
-            : styles.signBtn
-        }`}
-        disabled={
-          petition?.status === "closed" ||
-          isUserSignedPetition(petition)
-        }
-        onClick={() => handleSign(petition._id)}
-      >
-        {isUserSignedPetition(petition)
-          ? "Already Signed"
-          : "Sign Petition"}
-      </button>
-    )}
-    {isUserOwnPetition(petition) && (
-      <button className={styles.ownerBtn}>
-        Created By You
-      </button>
-    )}
-  </div>
-)}
+                            {isOfficial ? (
+                              <div className={styles.officialActions}>
+                                {/* <OfficialStatusDropdown
+                                  petition={petition}
+                                  handleStatusUpdate={handleStatusUpdate}
+                                  officialName={userObject.name || "Official"}
+                                /> */}
+                              </div>
+                            ) : (
+                              <div className={styles.userActions}>
+                                {!isUserOwnPetition(petition) && (
+                                  <button
+                                    className={`${styles.actionBtn} ${
+                                      isUserSignedPetition(petition)
+                                        ? styles.signedBtn
+                                        : styles.signBtn
+                                    }`}
+                                    disabled={
+                                      normalizeStatus(petition?.status) === "closed" ||
+                                      isUserSignedPetition(petition)
+                                    }
+                                    onClick={() => handleSign(petition._id)}
+                                  >
+                                    {isUserSignedPetition(petition)
+                                      ? "Already Signed"
+                                      : "Sign Petition"}
+                                  </button>
+                                )}
+                                {isUserOwnPetition(petition) && (
+                                  <button className={styles.ownerBtn}>
+                                    Created By You
+                                  </button>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -667,47 +662,8 @@ const PetitionHead = () => {
             </>
           )}
         </div>
-
-        {!loading && (
-          <div className={styles.statsRow}>
-            <div className={styles.statCard}>
-              <h5 className={styles.statNumber}>{petitions.length}</h5>
-              <small className={styles.statLabel}>Total Petitions</small>
-            </div>
-            {isOfficial ? (
-              <>
-                <div className={styles.statCard}>
-                  <h5 className={styles.statNumberWarning}>{underReviewCount}</h5>
-                  <small className={styles.statLabel}>Under Review</small>
-                </div>
-                <div className={styles.statCard}>
-                  <h5 className={styles.statNumberSecondary}>{closedCount}</h5>
-                  <small className={styles.statLabel}>Closed</small>
-                </div>
-                <div className={styles.statCard}>
-                  <h5 className={styles.statNumberSuccess}>
-                    {petitions.length - underReviewCount - closedCount}
-                  </h5>
-                  <small className={styles.statLabel}>Open</small>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className={styles.statCard}>
-                  <h5 className={styles.statNumberInfo}>{myPetitionsCount}</h5>
-                  <small className={styles.statLabel}>My Petitions</small>
-                </div>
-                <div className={styles.statCard}>
-                  <h5 className={styles.statNumberSuccess}>{signedPetitionsCount}</h5>
-                  <small className={styles.statLabel}>Signed By Me</small>
-                </div>
-              </>
-            )}
-          </div>
-        )}
       </div>
       <Popup message={popup} onClose={() => setPopup("")} />
-      <Footer />
     </>
   );
 };

@@ -205,9 +205,8 @@ function Login() {
               </div>
 
               <div className="r field">
-                <input type="checkbox" id="rememberme" name="rememberme" />
-                <label htmlFor="rememberme">Remember Me</label>
-                <Link to="/forgot" style={{ marginLeft: '2rem' }} className="r1">
+                
+                <Link to="/forgot" style={{ marginLeft: '10rem' }} className="r1">
                   Forgot Password?
                 </Link>
               </div>
