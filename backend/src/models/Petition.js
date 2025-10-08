@@ -13,6 +13,11 @@ const petitionSchema = new mongoose.Schema({
     type: String,
     enum: ["active", "under review", "closed"],
     default: "active"
+  },
+  officialResponse: {
+    text: { type: String },
+    respondedAt: { type: Date },
+    respondedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
   }
 }, { timestamps: true });
 
