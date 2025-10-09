@@ -3,7 +3,7 @@ import Petition from '../models/Petition.js';
 import Poll from '../models/poll.js';
 import Vote from '../models/vote.js';
 
-// Generate a new report
+// Generate a New report
 export const generateReport = async (req, res) => {
   try {
     const { type, location, startDate, endDate } = req.body;

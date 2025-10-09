@@ -1,6 +1,16 @@
 import Petition from '../models/Petition.js';
 import Comment from '../models/Comment.js';
 
+// map petition status to comment status
+const mapPetitionStatusToCommentStatus = (petitionStatus) => {
+  const statusMap = {
+    'active': 'in_progress',
+    'under_review': 'in_progress',
+    'closed': 'resolved'
+  };
+  return statusMap[petitionStatus] || 'pending';
+};
+
 // Get petitions by location for officials
 export const getLocationPetitions = async (req, res) => {
   try {
@@ -61,7 +71,7 @@ export const updatePetitionStatus = async (req, res) => {
         petition: petitionId,
         author: req.user._id,
         content: comment,
-        status,
+        status: mapPetitionStatusToCommentStatus(status), // Map to valid comment status
         isOfficial: true
       });
     }
@@ -103,12 +113,12 @@ export const closePetition = async (req, res) => {
     petition.status = 'closed';
     await petition.save();
 
-    // Add closing comment
+    // Add closing comment with mapped status
     await Comment.create({
       petition: petitionId,
       author: req.user._id,
       content: reason || 'Petition closed by official',
-      status: 'closed',
+      status: 'resolved', // Use valid comment status
       isOfficial: true
     });
 

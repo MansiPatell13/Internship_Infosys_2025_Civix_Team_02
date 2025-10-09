@@ -1,4 +1,4 @@
-// Load environment variables first
+// environment variables first
 import dotenv from "dotenv";
 dotenv.config();
 

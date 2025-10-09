@@ -10,7 +10,7 @@ import {
 
 const router = express.Router();
 
-// All routes require authentication
+// All Routes require authentication
 router.use(auth);
 
 // Add comment to petition (officials only)

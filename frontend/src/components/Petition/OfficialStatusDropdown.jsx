@@ -25,7 +25,6 @@ const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) 
     const status = e.target.value;
     if (!status) return;
     
-    // Check location before opening popup
     const userStr = localStorage.getItem("user");
     const currentUser = userStr ? JSON.parse(userStr) : null;
     
@@ -48,89 +47,94 @@ const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) 
   };
 
   const handleSubmit = async () => {
-    if (!responseText.trim()) {
-      alert("Please enter a response or reason");
+  if (!responseText.trim()) {
+    alert("Please enter a response or reason");
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to update petition status.");
+      setIsSubmitting(false);
       return;
     }
 
-    setIsSubmitting(true);
+    const userStr = localStorage.getItem("user");
+    const currentUser = userStr ? JSON.parse(userStr) : null;
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You must be logged in to update petition status.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Verify location one more time
-      const userStr = localStorage.getItem("user");
-      const currentUser = userStr ? JSON.parse(userStr) : null;
-
-      if (currentUser && currentUser.location && petition.location && 
-          currentUser.location !== petition.location) {
-        alert(`You can only manage petitions in your assigned location (${currentUser.location}). This petition is in ${petition.location}.`);
-        setIsSubmitting(false);
-        return;
-      }
-
-      let apiUrl;
-      let requestBody;
-      let method;
-
-      // Use the correct official API based on action
-      if (selectedStatus === "closed") {
-        apiUrl = `http://localhost:4000/api/official/petitions/${petition._id}/close`;
-        requestBody = { reason: responseText };
-        method = "POST";
-      } else {
-        apiUrl = `http://localhost:4000/api/official/petitions/${petition._id}/status`;
-        // Map frontend status to backend expected values
-        let backendStatus = selectedStatus;
-        if (selectedStatus === "under-review") {
-          backendStatus = "under_review";
-        }
-        
-        requestBody = {
-          status: backendStatus,
-          comment: responseText
-        };
-        method = "PUT";
-      }
-
-      const res = await fetch(apiUrl, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to update petition status");
-      }
-
-      // Call the parent handler to refresh the petition data
-      if (handleStatusUpdate) {
-        await handleStatusUpdate(petition._id);
-      }
-
-      setTimeout(() => {
-        setShowPopup(false);
-        setResponseText("");
-        setSelectedStatus("");
-        setCharCount(0);
-        setIsSubmitting(false);
-      }, 300);
-
-    } catch (error) {
-      console.error("Error updating status:", error);
-      alert(error.message || "Error updating petition status");
+    if (currentUser && currentUser.location && petition.location && 
+        currentUser.location !== petition.location) {
+      alert(`You can only manage petitions in your assigned location (${currentUser.location}). This petition is in ${petition.location}.`);
       setIsSubmitting(false);
+      return;
     }
-  };
+
+    let apiUrl;
+    let requestBody;
+    let method;
+
+    // Use the correct official API based on action
+    if (selectedStatus === "closed") {
+      apiUrl = `http://localhost:4000/api/official/petitions/${petition._id}/close`;
+      requestBody = { reason: responseText };
+      method = "POST";
+    } else {
+      apiUrl = `http://localhost:4000/api/official/petitions/${petition._id}/status`;
+      // Map frontend status to backend expected values
+      let backendStatus = selectedStatus;
+      if (selectedStatus === "under-review") {
+        backendStatus = "under_review";
+      }
+      
+      // Include comment so backend creates official comment
+      requestBody = {
+        status: backendStatus,
+        comment: responseText
+      };
+      method = "PUT";
+    }
+
+    const res = await fetch(apiUrl, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Failed to update petition status");
+    }
+
+    const result = await res.json();
+
+    // Call the parent handler to refresh the petition data
+    if (handleStatusUpdate) {
+      await handleStatusUpdate(petition._id);
+    }
+
+    // Show success message with response details
+    alert(result.message || "Status updated and official response recorded!");
+
+    setTimeout(() => {
+      setShowPopup(false);
+      setResponseText("");
+      setSelectedStatus("");
+      setCharCount(0);
+      setIsSubmitting(false);
+    }, 300);
+
+  } catch (error) {
+    console.error("Error updating status:", error);
+    alert(error.message || "Error updating petition status");
+    setIsSubmitting(false);
+  }
+};
 
   const handleCancel = () => {
     setShowPopup(false);
@@ -274,3 +278,5 @@ const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) 
 };
 
 export default OfficialStatusDropdown;
+
+// done

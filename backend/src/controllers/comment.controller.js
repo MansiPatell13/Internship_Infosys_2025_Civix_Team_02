@@ -52,19 +52,16 @@ export const getComments = async (req, res) => {
   try {
     const { petitionId } = req.params;
 
-    // First get the petition to check location
+    // First get the petition to verify it exists
     const petition = await Petition.findById(petitionId);
     if (!petition) {
       return res.status(404).json({ message: 'Petition not found' });
     }
 
-    // If user is an official, check location authorization
-    if (req.user.role === 'official' && req.user.location !== petition.location) {
-      return res.status(403).json({ 
-        message: 'Officials can only view petitions in their assigned location' 
-      });
-    }
-
+    // Allow all authenticated users to VIEW comments
+    // Location restriction only applies when ADDING comments
+    // This ensures transparency - everyone can see official responses
+    
     const comments = await Comment.find({ petition: petitionId })
       .populate('author', 'name role location')
       .sort('-createdAt');
@@ -121,7 +118,7 @@ export const deleteComment = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to delete this comment' });
     }
 
-    await comment.remove();
+    await comment.deleteOne();
     res.json({ message: 'Comment deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
