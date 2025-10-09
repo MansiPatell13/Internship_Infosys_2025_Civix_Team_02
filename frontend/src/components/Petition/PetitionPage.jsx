@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaPencilAlt } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
+import { MdOutlinePoll } from "react-icons/md";
 import Footer from "../Landing/Footer";
 import Navbar from "../Landing/Navbar";
 import styles from "./PetitionPage.module.css";
@@ -132,16 +133,13 @@ const PetitionPage = ({ isInDashboard = false, onSuccess }) => {
         {/* Popup for officials */}
         {showPopup && (
           <div className={styles.popupOverlay}>
-            <div className={styles.popupBox}>
-              <h3>Access Restricted</h3>
-              <p>Only citizens can create petitions.</p>
-              {/* <button
-                className={styles.cancelBtn}
-                onClick={() => setShowPopup(false)}
-              >
-                Close
-              </button> */}
-            </div>
+            <div className={isInDashboard ? styles.dashboardCard : styles.card}>
+                      <div className={styles.errorContainer}>
+                        <MdOutlinePoll style={{ fontSize: '3rem', color: '#ef4444', marginBottom: '1rem' }} />
+                        <h2>Access Restricted</h2>
+                        <p>Only citizens can create petition. You are registered as: <strong>official</strong></p>
+                      </div>
+                    </div>
           </div>
         )}
 
