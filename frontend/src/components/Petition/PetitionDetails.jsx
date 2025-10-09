@@ -156,107 +156,102 @@ const PetitionDetails = ({ isInDashboard, petitionId: propPetitionId, onBack }) 
   };
 
   const confirmStatusChange = async () => {
-    if (!responseText.trim()) {
-      alert("Please provide a reason before submitting.");
-      return;
-    }
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Login required to update petition.");
-      return;
-    }
-    if (user?.location !== petition.location) {
-      alert(`You can only manage petitions in your location: ${user.location}`);
-      return;
-    }
+  if (!responseText.trim()) {
+    alert("Please provide a reason before submitting.");
+    return;
+  }
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Login required to update petition.");
+    return;
+  }
+  if (user?.location !== petition.location) {
+    alert(`You can only manage petitions in your location: ${user.location}`);
+    return;
+  }
 
-    setIsSubmitting(true);
-    try {
-      let apiUrl, method, body;
-      if (selectedStatus === "closed") {
-        // Close petition endpoint
-        apiUrl = `http://localhost:4000/api/official/petitions/${petition._id}/close`;
-        method = "POST";
-        body = JSON.stringify({ reason: responseText });
-      } else {
-        // Update status endpoint - DON'T send comment to avoid backend validation error
-        // Backend has a bug where it tries to save petition status to Comment model
-        apiUrl = `http://localhost:4000/api/official/petitions/${petition._id}/status`;
-        method = "PUT";
-        body = JSON.stringify({
-          status: getBackendStatus(selectedStatus)
-          // NOT sending comment field to avoid backend creating a Comment with invalid status
-        });
-      }
-      
-      const res = await fetch(apiUrl, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body,
-      }).catch(() => null);
+  setIsSubmitting(true);
+  try {
+    let apiUrl, method, body;
+    
+    // Step 1: Update petition status
+    if (selectedStatus === "closed") {
+      apiUrl = `http://localhost:4000/api/official/petitions/${petition._id}/close`;
+      method = "POST";
+      body = JSON.stringify({ reason: responseText });
+    } else {
+      apiUrl = `http://localhost:4000/api/official/petitions/${petition._id}/status`;
+      method = "PUT";
+      body = JSON.stringify({
+        status: getBackendStatus(selectedStatus),
+        comment: responseText // Include comment for backend to create official comment
+      });
+    }
+    
+    const res = await fetch(apiUrl, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body,
+    });
 
-      if (!res || !res.ok) {
-        let errorMessage = "Failed to update status";
-        if (res) {
-          try {
-            const errorData = await res.json();
-            errorMessage = errorData.message || errorMessage;
-          } catch (e) {
-            // If JSON parsing fails, use default message
-          }
-        }
-        throw new Error(errorMessage);
-      }
-
-      const result = await res.json().catch(() => ({ message: "Status updated" }));
-      
-      // Refresh petition data
+    if (!res.ok) {
+      let errorMessage = "Failed to update status";
       try {
-        const refetchedPetition = await fetch(
-          `http://localhost:4000/api/petitions/${id}`
-        ).then((res) => res.json());
-        setPetition(refetchedPetition);
+        const errorData = await res.json();
+        errorMessage = errorData.message || errorMessage;
       } catch (e) {
-        // Silently fail
+        // If JSON parsing fails, use default message
       }
-      
-      // Try to refresh comments (silently fail if not accessible)
-      setTimeout(async () => {
-        try {
-          const commentsRes = await fetch(
-            `http://localhost:4000/api/comments/petition/${id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-              }
-            }
-          ).catch(() => null);
-          
-          if (commentsRes && commentsRes.ok) {
-            const commentsData = await commentsRes.json().catch(() => null);
-            if (commentsData) {
-              setComments(commentsData);
+      throw new Error(errorMessage);
+    }
+
+    const result = await res.json();
+    
+    // Step 2: Refresh petition data
+    try {
+      const refetchedPetition = await fetch(
+        `http://localhost:4000/api/petitions/${id}`
+      ).then((res) => res.json());
+      setPetition(refetchedPetition);
+    } catch (e) {
+      console.warn("Failed to refresh petition");
+    }
+    
+    // Step 3: Refresh comments to show new official response
+    setTimeout(async () => {
+      try {
+        const commentsRes = await fetch(
+          `http://localhost:4000/api/comments/petition/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
             }
           }
-        } catch (e) {
-          // Silently ignore
+        );
+        
+        if (commentsRes.ok) {
+          const commentsData = await commentsRes.json();
+          setComments(commentsData);
         }
-      }, 500);
-      
-      setShowPopup(false);
-      setResponseText("");
-      setSelectedStatus("");
-      alert(result.message || "Petition status updated successfully!");
-    } catch (err) {
-      alert("Error updating status: " + err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      } catch (e) {
+        console.warn("Failed to refresh comments");
+      }
+    }, 500);
+    
+    setShowPopup(false);
+    setResponseText("");
+    setSelectedStatus("");
+    alert(result.message || "Petition status updated successfully!");
+  } catch (err) {
+    alert("Error updating status: " + err.message);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleSignPetition = async () => {
     const token = localStorage.getItem("token");
@@ -451,17 +446,8 @@ const PetitionDetails = ({ isInDashboard, petitionId: propPetitionId, onBack }) 
 
           {/* Official Response */}
           {latestOfficial && (
-            <div className={styles.responseBox}>
-              <h4>Official Response</h4>
-              <p>{latestOfficial.content}</p>
-              <div className={styles.responseMeta}>
-                <small className={styles.responseAuthor}>
-                  By: {latestOfficial.author?.name || "Official"}
-                </small>
-                <small className={styles.responseDate}>
-                  {new Date(latestOfficial.createdAt).toLocaleDateString()}
-                </small>
-              </div>
+            <div>
+              
             </div>
           )}
 

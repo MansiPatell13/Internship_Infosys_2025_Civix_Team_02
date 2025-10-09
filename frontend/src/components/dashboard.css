@@ -937,3 +937,783 @@ body {
   }
 
 }
+
+:root {
+  --primary-color: #22c55e;
+  --primary-light: #16a34a;
+  --background-color: #f0fdf4;
+  --card-bg: #ffffff;
+  --text-color: #1e293b;
+  --secondary-text-color: #64748b;
+  --border-radius: 16px;
+  --box-shadow-light: 0 10px 25px rgba(0, 0, 0, 0.08), 0 5px 10px rgba(0, 0, 0, 0.04);
+  --box-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.12), 0 6px 15px rgba(0, 0, 0, 0.06);
+}
+
+body, html {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  height: 100%;
+}
+
+.dash {
+  display: flex;
+  flex-direction: column;
+  height: 100%; 
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f8fafc 100%);
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.main-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  padding: 2rem 0;
+  gap: 2rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Left Panel */
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 280px;
+  min-width: 280px;
+  flex-shrink: 0;
+  height: auto; 
+}
+
+.left-panel-fixed {
+  position: sticky;
+  top: 2rem;
+  align-self: flex-start;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) transparent;
+}
+
+.left-panel-fixed::-webkit-scrollbar {
+  width: 6px;
+}
+
+.left-panel-fixed::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.left-panel-fixed::-webkit-scrollbar-thumb {
+  background-color: var(--primary-color);
+  border-radius: 3px;
+}
+
+.user-card, .menu-card {
+  background-color: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-light);
+  border: 1px solid #f1f5f9;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.user-card:hover, .menu-card:hover, .petition-card:hover, .stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-hover);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.user-avatar {
+  font-size: 4rem;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.user-info h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.2rem 0;
+}
+
+.user-info p {
+  font-size: 0.9rem;
+  color: var(--secondary-text-color);
+  margin: 0.1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.menu-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.menu-list a {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: var(--text-color);
+  font-weight: 500;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+}
+
+.menu-list a:hover {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: var(--primary-color);
+}
+
+.menu-list a.logout {
+  color: #d32f2f;
+  margin-top: 2rem;
+}
+
+.menu-list a .icon {
+  margin-right: 0.8rem;
+  font-size: 1.25rem;
+}
+
+/* Right Panel */
+.right-panel {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  overflow-y: auto;
+  height: calc(100vh - 4rem);
+  padding-right: 1rem;
+}
+
+.welcome-message h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.welcome-message p {
+  font-size: 1rem;
+  color: var(--secondary-text-color);
+  margin: 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background-color: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-light);
+  border: 1px solid #f1f5f9;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--primary-color);
+}
+
+.stat-card h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0.5rem 0 0 0;
+}
+
+.stat-card p {
+  font-size: 0.9rem;
+  color: var(--secondary-text-color);
+  margin: 0;
+}
+
+.filters-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filter-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.filter-controls h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.location-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.location-filter label {
+  font-weight: 500;
+}
+
+.location-input {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+}
+
+.location-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+.category-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.category-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #374151;
+}
+
+.category-btn:hover {
+  background-color: #f1f5f9;
+  border-color: var(--primary-color);
+}
+
+.category-btn.active {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border-color: var(--primary-color);
+  font-weight: 600;
+  box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.3);
+}
+
+.petitions-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.petition-card {
+  background-color: var(--card-bg) !important;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-light);
+  padding: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  cursor: pointer;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  border: 1px solid #f1f5f9;
+  z-index: 1;
+}
+
+.petition-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-hover);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.petition-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.petition-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--primary-color);
+}
+
+.petition-card p {
+  font-size: 0.9rem;
+  color: var(--secondary-text-color);
+  margin: 0;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.tab-navigation {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--card-bg);
+  padding: 0.5rem;
+  border-radius: 12px;
+  box-shadow: var(--box-shadow-light);
+  border: 1px solid #f1f5f9;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  color: var(--text-color);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  background-color: rgba(34, 197, 94, 0.05);
+  color: var(--primary-color);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.polls-display {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.poll-card {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-light);
+  padding: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  cursor: pointer;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  border: 1px solid #f1f5f9;
+}
+
+.poll-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-hover);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.poll-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--primary-color);
+  line-height: 1.4;
+}
+
+.poll-card p {
+  font-size: 0.9rem;
+  color: var(--secondary-text-color);
+  margin: 0;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.no-petitions-found {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-light);
+  padding: 2rem;
+  text-align: center;
+}
+
+.clear-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.3);
+}
+
+.clear-button:hover {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 10px -1px rgba(34, 197, 94, 0.4);
+}
+
+/* Animations */
+.right-panel > *:not(.welcome-message):not(.stats-grid) {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablets (1024px and below) */
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+    padding: 1rem;
+    overflow: visible;
+  }
+  
+  .left-panel-fixed {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+  
+  .left-panel {
+    width: 100%;
+    min-width: unset;
+    gap: 1rem;
+  }
+  
+  .right-panel {
+    height: auto;
+    padding-right: 0;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile Landscape and Small Tablets (768px and below) */
+@media (max-width: 768px) {
+  .main-container {
+    padding: 0 0.75rem;
+  }
+  
+  .main-content {
+    padding: 0.75rem 0;
+    gap: 1rem;
+  }
+  
+  /* Stack user card and menu vertically on mobile */
+  .left-panel {
+    flex-direction: column;
+  }
+  
+  .user-card, .menu-card {
+    width: 100%;
+    padding: 1rem;
+  }
+  
+  /* Compact user info on mobile */
+  .user-avatar {
+    font-size: 3rem;
+  }
+  
+  .user-info h2 {
+    font-size: 1.25rem;
+  }
+  
+  .user-info p {
+    font-size: 0.85rem;
+  }
+  
+  /* Compact menu items */
+  .menu-list a {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+  }
+  
+  .menu-list a .icon {
+    margin-right: 0.6rem;
+    font-size: 1.1rem;
+  }
+  
+  /* Stats grid - 2 columns on mobile */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    padding: 1rem;
+  }
+  
+  .stat-card h2 {
+    font-size: 2rem;
+  }
+  
+  .stat-card h3 {
+    font-size: 0.95rem;
+  }
+  
+  /* Welcome message */
+  .welcome-message h1 {
+    font-size: 1.5rem;
+  }
+  
+  .welcome-message p {
+    font-size: 0.9rem;
+  }
+  
+  /* Filter controls stack vertically */
+  .filter-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .location-filter {
+    width: 100%;
+  }
+  
+  .location-input {
+    width: 100%;
+  }
+  
+  /* Category buttons wrap */
+  .category-buttons {
+    justify-content: flex-start;
+  }
+  
+  .category-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  /* Single column for petitions and polls */
+  .petitions-list,
+  .polls-display {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .petition-card,
+  .poll-card {
+    padding: 1.25rem;
+  }
+  
+  /* Tab navigation */
+  .tab-navigation {
+    padding: 0.4rem;
+  }
+  
+  .tab-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Small Mobile (480px and below) */
+@media (max-width: 480px) {
+  .main-container {
+    padding: 0 0.5rem;
+  }
+  
+  .main-content {
+    padding: 0.5rem 0;
+  }
+  
+  /* Even more compact user card */
+  .user-card, .menu-card {
+    padding: 0.85rem;
+    border-radius: 12px;
+  }
+  
+  .user-avatar {
+    font-size: 2.5rem;
+  }
+  
+  .user-info h2 {
+    font-size: 1.1rem;
+  }
+  
+  .user-info p {
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+  }
+  
+  /* Menu items even more compact */
+  .menu-list a {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+  
+  .menu-list a .icon {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  /* Single column stats */
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .stat-card {
+    padding: 0.85rem;
+  }
+  
+  .stat-card h2 {
+    font-size: 1.75rem;
+  }
+  
+  .stat-card h3 {
+    font-size: 0.9rem;
+  }
+  
+  .stat-card p {
+    font-size: 0.8rem;
+  }
+  
+  /* Welcome message */
+  .welcome-message h1 {
+    font-size: 1.35rem;
+  }
+  
+  .welcome-message p {
+    font-size: 0.85rem;
+  }
+  
+  /* Filter controls */
+  .filter-controls h2 {
+    font-size: 1.25rem;
+  }
+  
+  /* Category buttons smaller */
+  .category-btn {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Cards more compact */
+  .petition-card,
+  .poll-card {
+    padding: 1rem;
+  }
+  
+  .petition-card h3,
+  .poll-card h3 {
+    font-size: 1.1rem;
+  }
+  
+  .petition-card p,
+  .poll-card p {
+    font-size: 0.85rem;
+  }
+  
+  /* Tab buttons */
+  .tab-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  /* Clear button */
+  .clear-button {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Extra Small Mobile (360px and below) */
+@media (max-width: 360px) {
+  .user-avatar {
+    font-size: 2rem;
+  }
+  
+  .user-info h2 {
+    font-size: 1rem;
+  }
+  
+  .menu-list a {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .stat-card h2 {
+    font-size: 1.5rem;
+  }
+  
+  .welcome-message h1 {
+    font-size: 1.2rem;
+  }
+  
+  .petition-card h3,
+  .poll-card h3 {
+    font-size: 1rem;
+  }
+}
