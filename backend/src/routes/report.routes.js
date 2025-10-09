@@ -5,16 +5,12 @@ import Petition from "../models/Petition.js";
 import Poll from "../models/poll.js";
 import Vote from "../models/vote.js";
 import Report from "../models/Report.js";
-import PDFDocument from "pdfkit";   // for PDF export
-import { Parser } from "json2csv";  // for CSV export
+import PDFDocument from "pdfkit";   
+import { Parser } from "json2csv"; 
 
 const router = Router();
 
-/**
- * Export Report (PDF or CSV, for citizens - full history of their own data)
- * GET /api/reports/export?type=pdf
- * NOTE: This must come BEFORE other routes to avoid being caught by /:id
- */
+
 router.get("/export", requireAuth, async (req, res) => {
   try {
     const userId = req.user._id;

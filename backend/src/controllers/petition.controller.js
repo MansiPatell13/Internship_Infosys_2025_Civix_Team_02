@@ -1,7 +1,7 @@
 import Petition from '../models/Petition.js';
 import Comment from '../models/Comment.js';
 
-// Map petition status to comment status
+// map petition status to comment status
 const mapPetitionStatusToCommentStatus = (petitionStatus) => {
   const statusMap = {
     'active': 'in_progress',

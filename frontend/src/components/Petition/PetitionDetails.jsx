@@ -5,7 +5,7 @@ import Navbar from "../Landing/Navbar";
 import Footer from "../Landing/Footer";
 import styles from "./PetitionDetails.module.css";
 
-// Utility for mapping frontend status label to backend enum
+// DOne
 const getBackendStatus = (status) => {
   if (status === "under-review") return "under_review";
   if (status === "active" || status === "closed") return status;

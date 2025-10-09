@@ -25,7 +25,6 @@ const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) 
     const status = e.target.value;
     if (!status) return;
     
-    // Check location before opening popup
     const userStr = localStorage.getItem("user");
     const currentUser = userStr ? JSON.parse(userStr) : null;
     
@@ -63,7 +62,6 @@ const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) 
       return;
     }
 
-    // Verify location one more time
     const userStr = localStorage.getItem("user");
     const currentUser = userStr ? JSON.parse(userStr) : null;
 
@@ -280,3 +278,5 @@ const OfficialStatusDropdown = ({ petition, handleStatusUpdate, officialName }) 
 };
 
 export default OfficialStatusDropdown;
+
+// done

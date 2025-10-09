@@ -670,3 +670,5 @@ const PetitionHead = ({ isInDashboard, onViewDetails }) => {
 };
 
 export default PetitionHead;
+
+// Done
